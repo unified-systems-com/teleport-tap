@@ -1,0 +1,31 @@
+# Identity chain (pre-boot conformance gate enforces agreement):
+#   slug = "teleport"  ·  distribution = "teleport-tap"  ·  import namespace = "tap_plugin.teleport"
+#   entry-point key = "teleport"
+[project]
+name = "teleport-tap"
+description = "Teleport infrastructure access as grid vocabulary: v0 carries one outer node, the Teleport cluster (the access service), so a design can place it before anything is collected."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.14"
+dynamic = ["version"]
+dependencies = []
+
+[project.entry-points."tap.plugins"]
+teleport = "tap_plugin.teleport.apps:TeleportConfig"
+
+# The plugin's OWN dev closure (PEP 735), so its suite runs in a bare checkout. Never installed by boot.
+[dependency-groups]
+dev = ["pytest>=8.3", "pytest-django>=4.9", "factory-boy>=3.3"]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+fallback_version = "0.0.0"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["tap_plugin/teleport"]
