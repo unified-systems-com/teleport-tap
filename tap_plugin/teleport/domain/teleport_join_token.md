@@ -15,7 +15,7 @@ Joining is the cluster's front door for machines. A long-lived static token with
 
 ## Identity
 
-`NATURAL_KEY = (`cluster_name`, `name`)`. Token names are unique within a cluster. For the `token` join method the name IS the secret, so a collector must store a digest (`sha256:<hex>`) in `name`, never the value; delegated methods have non-secret names.
+`NATURAL_KEY = (`cluster_name`, `name`)`. Token names are unique within a cluster. For the `token` join method the name IS the secret, so for that method only its digest (`sha256:<64 hex>`) is accepted in `name` — the model refuses anything else; delegated methods have non-secret names.
 
 ## Boundaries
 
@@ -44,7 +44,7 @@ Vendor-specific.
 
 ## Fields
 
-- `name` — The token resource name. For delegated methods (`iam`, `github` …) a plain name; for the `token` method the collector stores `sha256:<hex>` of the secret, never the secret. Required.
+- `name` — The token resource name. For delegated methods (`iam`, `github` …) a plain name; for the `token` method the model refuses any value but `sha256:<64 hex>` of the secret (`validate()`), so the secret itself cannot be stored. Required.
 - `cluster_name` — The name of the Teleport cluster this record lives in — the same string as that cluster node's `name`. Part of the natural key because Teleport's names are unique only within one cluster (every cluster ships preset roles called `access`, `editor` and `auditor`). The traversable form of the same membership is the `BELONGS_TO_CLUSTER` edge; this column is what the key rests on (a key must be a column the generated search can filter).
 - `join_method` — How a joiner proves itself: `token` (shared secret), `ec2`, `iam`, `github`, `gitlab`, `kubernetes`, `azure`, `gcp`, `tpm`, `circleci`, `spacelift`, `terraform_cloud`, `bitbucket`, `oracle`, `azure_devops`, `bound_keypair` …. A string because Teleport adds methods most releases. Required: a design decides it.
 - `system_roles` — The system roles a joiner receives (`spec.roles`). Empty means not observed.

@@ -4,11 +4,18 @@ Spec: specs/spec-teleport-v0.md (req-teleport-policy).
 Domain article: domain/teleport_join_token.md.
 """
 
+import re
 from typing import Any, ClassVar
 
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from tap_grid.models import BaseModel
+
+#: Join methods whose token name is itself the shared secret.
+STATIC_SECRET_METHODS = frozenset({"token"})
+#: The only form such a name may take on the grid: the secret's SHA-256 digest.
+SECRET_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 
 
 class TeleportJoinToken(BaseModel):
@@ -24,9 +31,19 @@ class TeleportJoinToken(BaseModel):
     # environment default: those belong to the observation, stamped by whoever writes the node.
     DEFAULT_DIMENSIONS: ClassVar[dict[str, str]] = {"teleport.plane": "policy"}
     # Token names are unique within a cluster. For the `token` join method the name IS the secret,
-    # so a collector must store a digest (`sha256:<hex>`) in `name`, never the value; delegated
-    # methods have non-secret names.
+    # so for that method only its digest (`sha256:<64 hex>`) is accepted in `name` — the model
+    # refuses anything else; delegated methods have non-secret names.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"edges": [{"type": "ADMITS_IDENTITY__teleport"}]},
+    ]
+    INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_agent"}, {"type": "teleport__teleport_proxy_server"}, {"type": "teleport__teleport_bot"}], "edges": [{"type": "JOINS_WITH_TOKEN__teleport"}]},
+    ]
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",
@@ -71,3 +88,10 @@ class TeleportJoinToken(BaseModel):
 
     def __str__(self) -> str:
         return self.get_name()
+
+    def validate(self) -> None:
+        """A `token`-method token's name IS the join secret: only its digest may be stored."""
+        if self.join_method in STATIC_SECRET_METHODS and not SECRET_DIGEST.fullmatch(self.name or ""):
+            raise ValidationError(
+                {"name": [f"join_method '{self.join_method}' names the secret: store sha256:<64 hex> of it, never the value."]}
+            )

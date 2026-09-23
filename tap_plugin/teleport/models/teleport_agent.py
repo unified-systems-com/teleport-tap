@@ -26,6 +26,18 @@ class TeleportAgent(BaseModel):
     # The design knows a name; the host UUID arrives when the agent joins. Revisit to
     # `(cluster_name, host_id)` when observed.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"edges": [{"type": "RUNS_ON_COMPUTE__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_proxy_server"}], "edges": [{"type": "DIALS_REVERSE_TUNNEL__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_join_token"}], "edges": [{"type": "JOINS_WITH_TOKEN__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_ssh_node"}, {"type": "teleport__teleport_kube_cluster"}, {"type": "teleport__teleport_database"}, {"type": "teleport__teleport_app"}, {"type": "teleport__teleport_windows_desktop"}], "edges": [{"type": "SERVES_RESOURCE__teleport"}]},
+    ]
+    # No teleport edge ends here, so INBOUND_EDGES stays undeclared: an empty list would block
+    # every inbound edge, foreign ones included.
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

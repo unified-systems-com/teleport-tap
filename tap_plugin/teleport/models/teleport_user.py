@@ -26,6 +26,20 @@ class TeleportUser(BaseModel):
     # Teleport user names are unique within a cluster and are the identity stamped into the user
     # certificate.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_role"}], "edges": [{"type": "HOLDS_ROLE__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_sso_connector"}], "edges": [{"type": "LOGS_IN_VIA_CONNECTOR__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_access_list"}], "edges": [{"type": "MEMBER_OF_ACCESS_LIST__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_access_request"}], "edges": [{"type": "RAISES_ACCESS_REQUEST__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_access_request"}], "edges": [{"type": "REVIEWED_ACCESS_REQUEST__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_trusted_device"}], "edges": [{"type": "ENROLLED_DEVICE__teleport"}]},
+    ]
+    # No teleport edge ends here, so INBOUND_EDGES stays undeclared: an empty list would block
+    # every inbound edge, foreign ones included.
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

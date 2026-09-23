@@ -26,6 +26,15 @@ class TeleportCertificateAuthority(BaseModel):
     # A cluster has exactly one CA of each type, and Teleport names the CA resource after the
     # cluster, so `(cluster_name, ca_type)` is Teleport's own identity and a design can know it.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'ca_type')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"edges": [{"type": "SIGNS_WITH_KEY__teleport"}]},
+    ]
+    # No teleport edge ends here, so INBOUND_EDGES stays undeclared: an empty list would block
+    # every inbound edge, foreign ones included.
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

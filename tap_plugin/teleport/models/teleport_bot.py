@@ -25,6 +25,16 @@ class TeleportBot(BaseModel):
     DEFAULT_DIMENSIONS: ClassVar[dict[str, str]] = {"teleport.plane": "identity"}
     # Bot names are unique within a cluster (Teleport creates a `bot-<name>` user and role from it).
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_join_token"}], "edges": [{"type": "JOINS_WITH_TOKEN__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_role"}], "edges": [{"type": "HOLDS_ROLE__teleport"}]},
+    ]
+    # No teleport edge ends here, so INBOUND_EDGES stays undeclared: an empty list would block
+    # every inbound edge, foreign ones included.
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

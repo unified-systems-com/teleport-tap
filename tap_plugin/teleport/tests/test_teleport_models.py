@@ -96,6 +96,16 @@ def test_each_required_field_is_enforced(type_slug: str) -> None:
 
 
 @pytest.mark.django_db
+def test_static_token_name_must_be_a_digest() -> None:
+    """req-teleport-policy-2: for the `token` method the name is the secret, so only its digest is
+    accepted; delegated methods keep plain names."""
+    base = {"cluster_name": "stg", "join_method": "token"}
+    assert not _create("teleport__teleport_join_token", {**base, "name": "live-secret"}).success
+    assert _create("teleport__teleport_join_token", {**base, "name": "sha256:" + "0f" * 32}).success
+    assert _create("teleport__teleport_join_token", {"cluster_name": "stg", "join_method": "iam", "name": "aws-agents"}).success
+
+
+@pytest.mark.django_db
 def test_enum_refuses_an_unknown_value() -> None:
     """Three states: blank (not observed) and the vocabulary are accepted; anything else is refused."""
     ok = _create("teleport__teleport_cluster", {"name": "a", "fips": ""})

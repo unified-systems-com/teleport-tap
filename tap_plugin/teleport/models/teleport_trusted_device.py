@@ -26,6 +26,15 @@ class TeleportTrustedDevice(BaseModel):
     # Teleport identifies a device by its asset tag (the serial number on macOS/Windows/Linux)
     # within the cluster's inventory; the internal UUID is assigned at registration.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'asset_tag')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+    ]
+    INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_user"}], "edges": [{"type": "ENROLLED_DEVICE__teleport"}]},
+    ]
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

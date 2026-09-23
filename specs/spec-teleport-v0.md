@@ -229,7 +229,7 @@ What is permitted and how it is granted.
 | Model | Entity type | Key | Notable fields |
 | --- | --- | --- | --- |
 | `TeleportRole` | `teleport__teleport_role` | `(cluster_name, name)` | `role_version`, `origin`, `description`, `allow`, `deny`, `options` (the full rule blocks; the rules that point at modelled things are also edges) |
-| `TeleportJoinToken` | `teleport__teleport_join_token` | `(cluster_name, name)` | `join_method` (required; a string, Teleport adds methods often), `system_roles`, `bot_name`, `allow_rules`, `expires_at`. For the `token` method the name IS the secret: a collector stores `sha256:<hex>`, never the value. |
+| `TeleportJoinToken` | `teleport__teleport_join_token` | `(cluster_name, name)` | `join_method` (required; a string, Teleport adds methods often), `system_roles`, `bot_name`, `allow_rules`, `expires_at`. For the `token` method the name IS the secret: the model refuses anything but `sha256:<64 hex>`. |
 | `TeleportAccessList` | `teleport__teleport_access_list` | `(cluster_name, name)` | `title`, `description`, `audit_frequency`, `next_audit_date`, `grants`, `membership_requires` |
 | `TeleportAccessRequest` | `teleport__teleport_access_request` | `(cluster_name, name)` | `state` (PENDING, APPROVED, DENIED, PROMOTED), `reason`, `resolve_reason`, `created_at`, `expires_at` |
 
@@ -240,7 +240,7 @@ Plane `policy`. The access list and access request are named by Teleport-assigne
 | ACID | Title | Status | Description | Notes |
 | --- | --- | :---: | --- | --- |
 | req-teleport-policy-1 | Designable And Keyed | Implemented | Each type is created from its `CREATE_REQUIRED` fields alone and refused without any one of them; keys rest on carried fields. | `tests/test_teleport_models.py` |
-| req-teleport-policy-2 | No Secret Stored | Implemented | No field is documented or designed to hold a join-token secret; the `name` article states the digest rule. | `domain/teleport_join_token.md` |
+| req-teleport-policy-2 | No Secret Stored | Implemented | For a secret-bearing join method (`token`) the model's `validate()` refuses any `name` that is not `sha256:<64 hex>`, so the secret cannot reach the grid or the page; delegated methods keep plain names. | `test_static_token_name_must_be_a_digest` |
 
 ---
 
@@ -311,7 +311,7 @@ The twenty-six relationships in the tail catalog, each a `.edge.json` under `edg
 
 Every closed end names teleport types only. The eight edges that reach another platform — `RUNS_ON_COMPUTE`, `STORES_CLUSTER_STATE`, `WRITES_AUDIT_EVENTS`, `UPLOADS_SESSION_RECORDINGS`, `SIGNS_WITH_KEY`, `FRONTS_TARGET`, `ADMITS_IDENTITY`, `DELEGATES_LOGIN` — omit `targets`, and each description says what may appear there. Every `property_schema` is `additionalProperties: false`. Every edge stamps `teleport.plane`.
 
-Endpoint lists are **declarative** on this grid: teleport's models declare no `OUTBOUND_EDGES` (the estate convention: 3 of the 99 models in the six reference plugins surveyed declare it), and the grid's permission union (`req-grid-edge-constraints-3`) lets an unconstrained node create any edge, so a closed `sources`/`targets` list documents the vocabulary but does not refuse a write. Property schemas *are* enforced. A test pins the endpoint behaviour so a tightening of the grid surfaces here.
+Endpoint lists are **enforced**. The grid's permission union (`req-grid-edge-constraints-3`) lets an unconstrained node create any edge, so every teleport model declares `OUTBOUND_EDGES` — and `INBOUND_EDGES` where a teleport edge ends on it — derived from the edge files. A teleport edge from or to a type its definition does not name is refused (a role cannot "hold" a role; a forged grant path cannot be written). Foreign edge types stay permitted wherever their own endpoint lists are open or name the teleport type (e.g. compliance_core's `SCOPED_TO_COMPLIANCE_BOUNDARY`, whose sources are open). The three types no teleport edge ends on (agent, user, bot) leave `INBOUND_EDGES` undeclared, because an empty list would block every inbound edge, foreign ones included. A test asserts the declared constraints equal the edge files' endpoints, so they cannot drift.
 
 No containment is declared: records do not retire with their cluster by cascade (a cluster rebuild re-observes them), so `CONTAINMENT_EDGES` is empty on every type.
 
@@ -323,7 +323,7 @@ No containment is declared: records do not retire with their cluster by cascade 
 | req-teleport-edges-2 | Open Only Across Platforms | Implemented | An end is open exactly for the eight cross-platform edges; every closed end names teleport types only. | same |
 | req-teleport-edges-3 | Closed Property Schemas | Implemented | Every property schema forbids extras and declares no `hotlink`; an unknown property or enum value is refused through the service layer. | same |
 | req-teleport-edges-4 | Plane Stamped | Implemented | Every edge carries its plane. | same |
-| req-teleport-edges-5 | Endpoint Enforcement Stated | Implemented | The test pins that closed endpoint lists do not refuse writes from unconstrained nodes. | same |
+| req-teleport-edges-5 | Endpoints Enforced | Implemented | An edge from or to a type its definition does not name is refused through the service layer; declared node constraints equal the edge files' endpoints. | same |
 
 ---
 
@@ -400,7 +400,7 @@ Status: `Implemented`
 
 `panels/board/__init__.py` (`TeleportBoardPanelType`, slug `teleport-board`, view `teleport/panels/board.html`, css `teleport/css/board.css`), registered in `TeleportConfig.ready()`. `config.section` ∈ `posture`, `roles`, `identity`, `resources`, `requests`, `machines`, `trust`; `config.title`, `config.intro` optional. Reads are Gryphon (`execute_gryphon_raw`), each filtered by `$cluster` on `cluster_name`; folds are pure functions. Sections:
 
-- **posture** — tiles for FIPS, signature suite, local auth, second factor, device trust, session recording, edition (each good / bad / other / not observed against the FedRAMP expectation it names), version and proxy address; counts of auth servers, proxies, agents, roles, users (SSO vs local; any local is red), bots, pending requests, protected resources.
+- **posture** — tiles for FIPS, signature suite, local auth, second factor (only `webauthn` is green; `on` admits OTP and warns), device trust, session recording, edition (each good / bad / other / not observed against the FedRAMP expectation it names), version and proxy address; counts of auth servers, proxies, agents, roles, users (SSO vs local; any local is red), bots, pending requests, protected resources.
 - **roles** — per role: logins, label selectors, resources reached (`GRANTS_RESOURCE_ACCESS`), requestable roles with approvals (`PERMITS_ROLE_REQUEST`), session MFA, max TTL, deny present, holders with how granted (`HOLDS_ROLE.granted_by`), SSO mappings and access lists that grant it.
 - **identity** — SSO connectors with IdP; users by type with local accounts named; trusted devices enrolled; access lists with grants, owner/member counts and next review (overdue red).
 - **resources** — counts by kind; per kind, label frequencies and a table with detail, labels, serving agent and reaching roles/principals.

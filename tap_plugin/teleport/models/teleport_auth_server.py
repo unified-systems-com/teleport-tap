@@ -27,6 +27,19 @@ class TeleportAuthServer(BaseModel):
     # host UUID (`host_id`), which exists only once the process first starts. Revisit to
     # `(cluster_name, host_id)` when the collector observes it.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"edges": [{"type": "RUNS_ON_COMPUTE__teleport"}]},
+        {"edges": [{"type": "STORES_CLUSTER_STATE__teleport"}]},
+        {"edges": [{"type": "WRITES_AUDIT_EVENTS__teleport"}]},
+        {"edges": [{"type": "UPLOADS_SESSION_RECORDINGS__teleport"}]},
+    ]
+    INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_proxy_server"}], "edges": [{"type": "CALLS_AUTH_API__teleport"}]},
+    ]
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

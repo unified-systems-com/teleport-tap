@@ -26,6 +26,21 @@ class TeleportRole(BaseModel):
     # Role names are unique within a cluster and are what users, connectors and access lists
     # reference, so `(cluster_name, name)` is Teleport's own identity.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_ssh_node"}, {"type": "teleport__teleport_kube_cluster"}, {"type": "teleport__teleport_database"}, {"type": "teleport__teleport_app"}, {"type": "teleport__teleport_windows_desktop"}], "edges": [{"type": "GRANTS_RESOURCE_ACCESS__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_role"}], "edges": [{"type": "PERMITS_ROLE_REQUEST__teleport"}]},
+    ]
+    INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_user"}, {"type": "teleport__teleport_bot"}], "edges": [{"type": "HOLDS_ROLE__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_sso_connector"}], "edges": [{"type": "MAPS_TO_ROLE__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_access_list"}], "edges": [{"type": "GRANTS_ROLE__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_role"}], "edges": [{"type": "PERMITS_ROLE_REQUEST__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_access_request"}], "edges": [{"type": "REQUESTS_ROLE__teleport"}]},
+    ]
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

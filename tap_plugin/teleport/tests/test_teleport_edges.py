@@ -91,10 +91,25 @@ def test_endpoints_and_properties_are_enforced() -> None:
 
 
 @pytest.mark.django_db
-def test_closed_endpoint_lists_are_declarative_for_unconstrained_nodes() -> None:
-    """req-teleport-edges-5: teleport's models declare no OUTBOUND_EDGES (the estate convention), and
-    the grid's permission union lets an unconstrained node create any edge — so an edge file's
-    closed sources/targets document the vocabulary but do not refuse a write. This test pins that
-    behaviour so the day the grid tightens it, the spec's statement is revisited, not silently wrong."""
+def test_off_vocabulary_endpoints_are_refused() -> None:
+    """req-teleport-edges-5: every model declares OUTBOUND_EDGES (and INBOUND_EDGES where a teleport
+    edge ends), derived from the edge files, so the permission union refuses a teleport edge from or
+    to a type its definition does not name — a forged grant path cannot be written."""
+    cluster = _node("teleport__teleport_cluster", {"name": "stg"})
     role = _node("teleport__teleport_role", {"name": "r", "cluster_name": "stg"})
-    assert _edge(role, role, "HOLDS_ROLE__teleport").success
+    user = _node("teleport__teleport_user", {"name": "u", "cluster_name": "stg"})
+    assert not _edge(role, role, "HOLDS_ROLE__teleport").success  # a role holds no role
+    assert not _edge(user, cluster, "HOLDS_ROLE__teleport").success  # a cluster is not a role
+    assert not _edge(role, cluster, "FRONTS_TARGET__teleport").success  # a role fronts nothing
+    assert _edge(user, role, "HOLDS_ROLE__teleport").success
+
+
+def test_node_constraints_match_the_edge_files() -> None:
+    """The declared node constraints are exactly the edge files' endpoints, so the two cannot drift."""
+    from tap_grid.registry import get_model_class
+
+    defs = _defs()
+    for type_slug in {t for d in defs.values() for t in d["sources"]}:
+        model = get_model_class(type_slug)
+        declared = {e["type"] for entry in model.OUTBOUND_EDGES for e in entry["edges"]}
+        assert declared == {slug for slug, d in defs.items() if type_slug in d["sources"]}, type_slug

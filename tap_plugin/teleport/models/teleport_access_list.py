@@ -27,6 +27,17 @@ class TeleportAccessList(BaseModel):
     # cluster. A design keys on the name it chooses; revisit if the collector must key on the
     # assigned UUID.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_role"}], "edges": [{"type": "GRANTS_ROLE__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_access_list"}], "edges": [{"type": "MEMBER_OF_ACCESS_LIST__teleport"}]},
+    ]
+    INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_user"}, {"type": "teleport__teleport_access_list"}], "edges": [{"type": "MEMBER_OF_ACCESS_LIST__teleport"}]},
+    ]
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

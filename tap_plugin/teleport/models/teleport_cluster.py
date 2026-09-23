@@ -27,6 +27,16 @@ class TeleportCluster(BaseModel):
     # (`cluster_name`), baked into every certificate the cluster issues, and cannot be changed
     # without rebuilding the cluster. A design knows it before anything is built.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('name',)
+    # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
+    # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
+    # (or name this type) stay permitted by the grid's permission union.
+    OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "TRUSTS_ROOT_CLUSTER__teleport"}]},
+    ]
+    INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
+        {"nodes": [{"type": "teleport__teleport_auth_server"}, {"type": "teleport__teleport_proxy_server"}, {"type": "teleport__teleport_agent"}, {"type": "teleport__teleport_certificate_authority"}, {"type": "teleport__teleport_role"}, {"type": "teleport__teleport_user"}, {"type": "teleport__teleport_sso_connector"}, {"type": "teleport__teleport_bot"}, {"type": "teleport__teleport_join_token"}, {"type": "teleport__teleport_access_list"}, {"type": "teleport__teleport_access_request"}, {"type": "teleport__teleport_trusted_device"}, {"type": "teleport__teleport_ssh_node"}, {"type": "teleport__teleport_kube_cluster"}, {"type": "teleport__teleport_database"}, {"type": "teleport__teleport_app"}, {"type": "teleport__teleport_windows_desktop"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "TRUSTS_ROOT_CLUSTER__teleport"}]},
+    ]
     DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
         "tap_viz": {
             "shape": "round-rectangle",

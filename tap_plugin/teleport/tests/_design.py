@@ -71,7 +71,7 @@ def seed() -> dict[str, str]:
     edge(ids["alice"], ids["access"], "HOLDS_ROLE__teleport", {"granted_by": "sso_mapping"})
     edge(ids["alice"], ids["saml"], "LOGS_IN_VIA_CONNECTOR__teleport")
     ids["bot"] = member("teleport__teleport_bot", {"name": "gitlab-ci"}, c)
-    ids["token"] = member("teleport__teleport_join_token", {"name": "legacy", "join_method": "token", "system_roles": ["Bot"]}, c)
+    ids["token"] = member("teleport__teleport_join_token", {"name": "sha256:" + "ab" * 32, "join_method": "token", "system_roles": ["Bot"]}, c)
     edge(ids["bot"], ids["token"], "JOINS_WITH_TOKEN__teleport")
     edge(ids["bot"], ids["access"], "HOLDS_ROLE__teleport", {"granted_by": "static"})
     ids["list"] = member("teleport__teleport_access_list", {"name": "admins", "title": "Admins", "next_audit_date": "2020-01-01T00:00:00Z"}, c)

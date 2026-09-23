@@ -212,7 +212,8 @@ POSTURE: tuple[tuple[str, str, set[str], set[str], str], ...] = (
     ("fips", "FIPS build", {"enabled"}, {"disabled"}, "FedRAMP requires FIPS 140 validated cryptography: the Enterprise FIPS build started with --fips."),
     ("signature_algorithm_suite", "Signature suite", {"fips-v1", "hsm-v1"}, {"legacy"}, "A FIPS cluster signs with the fips-v1 (or hsm-v1) suite."),
     ("local_auth", "Local auth", {"disabled"}, {"enabled"}, "Every human signs in through the SSO connector; local passwords are a bypass of the IdP."),
-    ("second_factor", "Second factor", {"webauthn", "on"}, {"off", "otp"}, "Phishing-resistant MFA (WebAuthn / hardware keys)."),
+    # `on` requires a second factor but admits OTP, so it is not proof of phishing resistance: warn.
+    ("second_factor", "Second factor", {"webauthn"}, {"off", "otp"}, "Phishing-resistant MFA (WebAuthn / hardware keys); `on` also admits OTP."),
     ("device_trust_mode", "Device trust", {"required"}, {"off"}, "Access only from enrolled, trusted devices."),
     ("session_recording_mode", "Session recording", {"node-sync", "proxy-sync", "node", "proxy"}, {"off"}, "Every interactive session recorded."),
     ("edition", "Edition", {"enterprise"}, set(), "FIPS builds, HSM/KMS keys, device trust and access lists are Enterprise features."),

@@ -37,6 +37,7 @@ def test_posture_blank_is_not_observed_never_a_verdict() -> None:
     assert tiles["FIPS build"].tone == "good"
     assert tiles["Local auth"].tone == "bad"
     assert tiles["Device trust"].tone == "warn"
+    assert posture_tiles({"second_factor": "on"})[3].tone == "warn"  # `on` admits OTP
     assert tiles["Second factor"].tone == "unknown" and tiles["Second factor"].value == NOT_OBSERVED
     assert tiles["Version"].tone == "unknown"
 
