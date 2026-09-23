@@ -174,3 +174,14 @@ def test_cluster_name_is_matched_exactly() -> None:
     assert {n["name"] for n in _run(specs["teleport — clusters"], {"cluster": "a"})["nodes"]} == {"a"}
     got = _touched(_run(specs["teleport — members"], {"cluster": "a"}))
     assert a_auth in got and aba_auth not in got
+
+
+def test_graph_nav_rule_encodes_the_cluster_name() -> None:
+    """req-teleport-page-6: the picker tile's link carries the name percent-encoded, so a name with
+    `&`, `#` or a space opens that cluster's page and adds no other parameter."""
+    from tap_viz.panels.graph_panel import _fill_url_template
+
+    (panel,) = [p for p in _nodes(_doc(), "panel") if p["node"]["slug"] == "teleport-deployment"]
+    (rule,) = panel["node"]["config"]["nav_rules"]
+    url = _fill_url_template(rule["url_template"], {"entity_id": "x", "data": {"name": "a&b #c"}})
+    assert url == "/teleport?cluster=a%26b%20%23c"
