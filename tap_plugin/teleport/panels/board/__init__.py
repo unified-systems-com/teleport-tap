@@ -4,11 +4,14 @@ Spec: specs/spec-teleport-v0.md (req-teleport-panel-board).
 
 A panel instance names its ``section`` in ``config``; every section reads the same way:
 
-1. Resolve the cluster: ``?cluster=<entity_id>`` when the page was given one, otherwise the single
-   cluster on the grid. With several clusters and no parameter the board says so and picks none —
-   picking one silently would present one cluster's posture as "the" cluster's.
+1. Resolve the cluster: ``?cluster=<cluster name>`` (``teleport__teleport_cluster.name``, its natural
+   key, matched exactly) when the page was given one, otherwise the single cluster on the grid. With
+   several clusters and no parameter (or the every-cluster sentinel the page's searches default to)
+   the board says so and picks none — picking one silently would present one cluster's posture as
+   "the" cluster's.
 2. Run the section's Gryphon reads, each filtered to that cluster by ``cluster_name`` (every
-   in-cluster type carries it as part of its natural key).
+   in-cluster type carries it as part of its natural key). A read that joins two Teleport records
+   filters BOTH ends, so a cross-cluster edge never brings a foreign record into the section.
 3. Fold the envelopes into rows with pure functions, so the tests need no grid.
 
 Three states, never two: a blank field is *not observed*, and the board says "not observed" in
@@ -44,6 +47,13 @@ NOT_OBSERVED = "not observed"
 
 #: One Gryphon read per key, per section. ``$cluster`` is the resolved cluster's name.
 _IN = 'WHERE {v}.data.cluster_name = $cluster'
+#: A join between two Teleport records: both ends in the cluster.
+_BOTH = 'WHERE {a}.data.cluster_name = $cluster AND {b}.data.cluster_name = $cluster'
+#: A join whose other end is untyped (it may be one of several Teleport types): Gryphon can read
+#: ``cluster_name`` only on a labelled variable, so that end is scoped by its BELONGS_TO_CLUSTER edge
+#: to the cluster named ``$cluster`` instead, bound to ``c``.
+_B = "BELONGS_TO_CLUSTER__teleport"
+_VIA = 'WHERE {v}.data.cluster_name = $cluster AND c.data.name = $cluster'
 QUERIES: dict[str, dict[str, str]] = {
     "posture": {
         "auth": f"MATCH (n:teleport__teleport_auth_server) {_IN.format(v='n')} RETURN n",
@@ -57,39 +67,39 @@ QUERIES: dict[str, dict[str, str]] = {
     },
     "roles": {
         "role": f"MATCH (n:teleport__teleport_role) {_IN.format(v='n')} RETURN n",
-        "grants": f"MATCH (r:teleport__teleport_role)-[e:GRANTS_RESOURCE_ACCESS__teleport]->(x) {_IN.format(v='r')} RETURN r, x",
-        "requestable": f"MATCH (r:teleport__teleport_role)-[e:PERMITS_ROLE_REQUEST__teleport]->(x:teleport__teleport_role) {_IN.format(v='r')} RETURN r, x",
-        "holders": f"MATCH (h)-[e:HOLDS_ROLE__teleport]->(r:teleport__teleport_role) {_IN.format(v='r')} RETURN h, r",
-        "mappings": f"MATCH (c:teleport__teleport_sso_connector)-[e:MAPS_TO_ROLE__teleport]->(r:teleport__teleport_role) {_IN.format(v='r')} RETURN c, r",
-        "lists": f"MATCH (l:teleport__teleport_access_list)-[e:GRANTS_ROLE__teleport]->(r:teleport__teleport_role) {_IN.format(v='r')} RETURN l, r",
+        "grants": f"MATCH (r:teleport__teleport_role)-[e:GRANTS_RESOURCE_ACCESS__teleport]->(x)-[:{_B}]->(c:{T_CLUSTER}) {_VIA.format(v='r')} RETURN r, x",
+        "requestable": f"MATCH (r:teleport__teleport_role)-[e:PERMITS_ROLE_REQUEST__teleport]->(x:teleport__teleport_role) {_BOTH.format(a='r', b='x')} RETURN r, x",
+        "holders": f"MATCH (c:{T_CLUSTER})<-[:{_B}]-(h)-[e:HOLDS_ROLE__teleport]->(r:teleport__teleport_role) {_VIA.format(v='r')} RETURN h, r",
+        "mappings": f"MATCH (c:teleport__teleport_sso_connector)-[e:MAPS_TO_ROLE__teleport]->(r:teleport__teleport_role) {_BOTH.format(a='c', b='r')} RETURN c, r",
+        "lists": f"MATCH (l:teleport__teleport_access_list)-[e:GRANTS_ROLE__teleport]->(r:teleport__teleport_role) {_BOTH.format(a='l', b='r')} RETURN l, r",
     },
     "identity": {
         "connector": f"MATCH (n:teleport__teleport_sso_connector) {_IN.format(v='n')} RETURN n",
         "idp": f"MATCH (c:teleport__teleport_sso_connector)-[e:DELEGATES_LOGIN__teleport]->(i) {_IN.format(v='c')} RETURN c, i",
         "user": f"MATCH (n:teleport__teleport_user) {_IN.format(v='n')} RETURN n",
         "list": f"MATCH (n:teleport__teleport_access_list) {_IN.format(v='n')} RETURN n",
-        "members": f"MATCH (m)-[e:MEMBER_OF_ACCESS_LIST__teleport]->(l:teleport__teleport_access_list) {_IN.format(v='l')} RETURN m, l",
-        "list_roles": f"MATCH (l:teleport__teleport_access_list)-[e:GRANTS_ROLE__teleport]->(r:teleport__teleport_role) {_IN.format(v='l')} RETURN l, r",
+        "members": f"MATCH (c:{T_CLUSTER})<-[:{_B}]-(m)-[e:MEMBER_OF_ACCESS_LIST__teleport]->(l:teleport__teleport_access_list) {_VIA.format(v='l')} RETURN m, l",
+        "list_roles": f"MATCH (l:teleport__teleport_access_list)-[e:GRANTS_ROLE__teleport]->(r:teleport__teleport_role) {_BOTH.format(a='l', b='r')} RETURN l, r",
         "device": f"MATCH (n:teleport__teleport_trusted_device) {_IN.format(v='n')} RETURN n",
     },
     "resources": {
         **{k.split("__")[1]: f"MATCH (n:{k}) {_IN.format(v='n')} RETURN n" for k in RESOURCE_KINDS},
-        "served": f"MATCH (a:teleport__teleport_agent)-[e:SERVES_RESOURCE__teleport]->(x) {_IN.format(v='a')} RETURN a, x",
-        "grants": f"MATCH (r:teleport__teleport_role)-[e:GRANTS_RESOURCE_ACCESS__teleport]->(x) {_IN.format(v='r')} RETURN r, x",
+        "served": f"MATCH (a:teleport__teleport_agent)-[e:SERVES_RESOURCE__teleport]->(x)-[:{_B}]->(c:{T_CLUSTER}) {_VIA.format(v='a')} RETURN a, x",
+        "grants": f"MATCH (r:teleport__teleport_role)-[e:GRANTS_RESOURCE_ACCESS__teleport]->(x)-[:{_B}]->(c:{T_CLUSTER}) {_VIA.format(v='r')} RETURN r, x",
     },
     "requests": {
         "request": f"MATCH (n:teleport__teleport_access_request) {_IN.format(v='n')} RETURN n",
-        "raised": f"MATCH (u:teleport__teleport_user)-[e:RAISES_ACCESS_REQUEST__teleport]->(q:teleport__teleport_access_request) {_IN.format(v='q')} RETURN u, q",
-        "roles": f"MATCH (q:teleport__teleport_access_request)-[e:REQUESTS_ROLE__teleport]->(r:teleport__teleport_role) {_IN.format(v='q')} RETURN q, r",
-        "resources": f"MATCH (q:teleport__teleport_access_request)-[e:REQUESTS_RESOURCE__teleport]->(x) {_IN.format(v='q')} RETURN q, x",
-        "reviews": f"MATCH (u:teleport__teleport_user)-[e:REVIEWED_ACCESS_REQUEST__teleport]->(q:teleport__teleport_access_request) {_IN.format(v='q')} RETURN u, q",
+        "raised": f"MATCH (u:teleport__teleport_user)-[e:RAISES_ACCESS_REQUEST__teleport]->(q:teleport__teleport_access_request) {_BOTH.format(a='u', b='q')} RETURN u, q",
+        "roles": f"MATCH (q:teleport__teleport_access_request)-[e:REQUESTS_ROLE__teleport]->(r:teleport__teleport_role) {_BOTH.format(a='q', b='r')} RETURN q, r",
+        "resources": f"MATCH (q:teleport__teleport_access_request)-[e:REQUESTS_RESOURCE__teleport]->(x)-[:{_B}]->(c:{T_CLUSTER}) {_VIA.format(v='q')} RETURN q, x",
+        "reviews": f"MATCH (u:teleport__teleport_user)-[e:REVIEWED_ACCESS_REQUEST__teleport]->(q:teleport__teleport_access_request) {_BOTH.format(a='u', b='q')} RETURN u, q",
     },
     "machines": {
         "bot": f"MATCH (n:teleport__teleport_bot) {_IN.format(v='n')} RETURN n",
         "token": f"MATCH (n:teleport__teleport_join_token) {_IN.format(v='n')} RETURN n",
         "agent": f"MATCH (n:teleport__teleport_agent) {_IN.format(v='n')} RETURN n",
-        "joins": f"MATCH (j)-[e:JOINS_WITH_TOKEN__teleport]->(t:teleport__teleport_join_token) {_IN.format(v='t')} RETURN j, t",
-        "bot_roles": f"MATCH (b:teleport__teleport_bot)-[e:HOLDS_ROLE__teleport]->(r:teleport__teleport_role) {_IN.format(v='b')} RETURN b, r",
+        "joins": f"MATCH (c:{T_CLUSTER})<-[:{_B}]-(j)-[e:JOINS_WITH_TOKEN__teleport]->(t:teleport__teleport_join_token) {_VIA.format(v='t')} RETURN j, t",
+        "bot_roles": f"MATCH (b:teleport__teleport_bot)-[e:HOLDS_ROLE__teleport]->(r:teleport__teleport_role) {_BOTH.format(a='b', b='r')} RETURN b, r",
         "admits": f"MATCH (t:teleport__teleport_join_token)-[e:ADMITS_IDENTITY__teleport]->(i) {_IN.format(v='t')} RETURN t, i",
     },
     "trust": {
@@ -183,13 +193,17 @@ class ClusterChoice:
 
 
 def choose_cluster(clusters: list[dict[str, Any]], requested: str) -> ClusterChoice:
-    """``?cluster=<entity_id>`` wins; otherwise the only cluster; otherwise none, and say why."""
+    """``?cluster=<cluster name>`` wins, matched exactly; otherwise the only cluster; otherwise none,
+    and say why. The every-cluster sentinel (the type slug the page's searches default to) is no
+    choice at all, so it reads as absent."""
     clusters = sorted(clusters, key=lambda c: str(c.get("name") or ""))
+    if requested == T_CLUSTER:
+        requested = ""
     if requested:
         for c in clusters:
-            if c["entity_id"] == requested:
+            if c.get("name") == requested:
                 return ClusterChoice(c, others=[o for o in clusters if o is not c])
-        return ClusterChoice(None, f"No Teleport cluster on the grid has entity id {requested}.", clusters)
+        return ClusterChoice(None, f"No Teleport cluster on the grid is named {requested!r}.", clusters)
     if len(clusters) == 1:
         return ClusterChoice(clusters[0])
     if not clusters:
@@ -624,7 +638,7 @@ def trust_view(envs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             trusts.append({
                 "direction": direction,
                 "peer": peer.get("_label") or "",
-                "peer_id": peer.get("entity_id") or "",
+                "peer_name": peer.get("name") or "",
                 "enabled": props.get("enabled"),
                 "status": props.get("connection_status") or "",
                 "role_map": ", ".join(

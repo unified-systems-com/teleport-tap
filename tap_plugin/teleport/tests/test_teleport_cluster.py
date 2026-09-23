@@ -32,6 +32,15 @@ class TestTeleportCluster:
         )
         assert not result.results[0].success
 
+    def test_the_sentinel_is_not_a_cluster_name(self) -> None:
+        """req-teleport-model-5: the /teleport page's every-cluster sentinel can never be a real cluster's name."""
+        result = write_batch(
+            [WriteOperation(verb="create_node", type_slug=TYPE, payload={"name": TYPE})],
+            caller_context=CallerContext(),
+        )
+        assert not result.results[0].success
+        assert not TeleportCluster.all_objects.filter(name=TYPE).exists()
+
 
 def test_keyed_by_name() -> None:
     """req-teleport-model-3: the key rests only on a field the model carries."""

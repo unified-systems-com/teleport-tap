@@ -157,7 +157,7 @@ The cluster: the outer node, and the home of the cluster-wide settings an assess
 
 #### Implementation
 
-`models/teleport_cluster.py` — `TeleportCluster`, `teleport__teleport_cluster`, icon `teleport-cluster`, plane `deployment`, `NATURAL_KEY = ("name",)` (the cluster name is set once and baked into every certificate, so it is Teleport's own stable identity). Fields: `name` (required), `proxy_address`, `teleport_version`, `edition`, `fips`, `signature_algorithm_suite`, `local_auth`, `second_factor`, `device_trust_mode`, `session_recording_mode`, `tags`. Every enum admits `""` (not observed). Field meanings: `domain/teleport_cluster.md`.
+`models/teleport_cluster.py` — `TeleportCluster`, `teleport__teleport_cluster`, icon `teleport-cluster`, plane `deployment`, `NATURAL_KEY = ("name",)` (the cluster name is set once and baked into every certificate, so it is Teleport's own stable identity). Fields: `name` (required; the value `teleport__teleport_cluster` is refused because it is the /teleport page's every-cluster sentinel), `proxy_address`, `teleport_version`, `edition`, `fips`, `signature_algorithm_suite`, `local_auth`, `second_factor`, `device_trust_mode`, `session_recording_mode`, `tags`. Every enum admits `""` (not observed). Field meanings: `domain/teleport_cluster.md`.
 
 #### Acceptance Criteria
 
@@ -167,6 +167,7 @@ The cluster: the outer node, and the home of the cluster-wide settings an assess
 | req-teleport-model-2 | Name Required | Implemented | A `create_node` write without `name` is refused. | |
 | req-teleport-model-3 | Keyed By Name | Implemented | `NATURAL_KEY` is `("name",)` and every key field is a model field. | |
 | req-teleport-model-4 | Posture Is Three-State | Implemented | Each posture enum accepts `""` and its vocabulary and refuses any other value. | `test_enum_refuses_an_unknown_value` |
+| req-teleport-model-5 | Sentinel Refused | Implemented | A `create_node` write whose `name` is `teleport__teleport_cluster` is refused. | `tests/test_teleport_cluster.py` |
 
 ---
 
@@ -351,11 +352,14 @@ Status: `Implemented`
 | 7 | `machines` | Machines: bots, agents and join tokens | auto |
 | 8 | `trust` | Trust: certificate authorities and trusted clusters | auto |
 
-**Parameter.** `?cluster=<entity_id>` selects the cluster for every panel; with exactly one cluster on the grid it is chosen without the parameter; with several and none named, the graph draws the clusters alone as a picker (each tile opens `/teleport?cluster=<id>`) and each board section lists them as links. Nothing in the bundle names an instance.
+**Parameter.** `?cluster=<cluster name>` selects the cluster for every panel: the cluster's name (`teleport__teleport_cluster.name`, its natural key), matched exactly, never its entity id (ruled 2026-09-23: there will be many clusters, and a name is what an operator types and a link carries). With exactly one cluster on the grid it is chosen without the parameter; with several and none named, the graph draws the clusters alone as a picker (each tile opens `/teleport?cluster=<name>` through the panel's nav rule, `{data.name}`) and each board section lists them as links. Nothing in the bundle names an instance.
 
-The graph's scene searches are not parameterized by cluster: Gryphon has no parameter-absent predicate (tap#360), so a search that took `$cluster` could not also serve the one-cluster default. They fetch the teleport scene grid-wide and the layout scopes it in the browser; both halves are gated on `grid.read`, so a reader sees nothing the grid would not already show them. Server-side scoping is the change to make when tap#360 lands.
+**Scene searches take the name.** Every search declares one input, `cluster` (string), and filters each cluster it reaches with `(c.data.name = $cluster OR c.entity_type = $cluster)`. The default is the sentinel `teleport__teleport_cluster`, the cluster type's own slug, which every cluster's `entity_type` equals, so `?cluster` absent returns every cluster (the one cluster on a single-cluster grid, the picker on a multi-cluster one). The sentinel stands in for the parameter-absent predicate Gryphon does not have (tap#360); `teleport__teleport_cluster.name` refuses it, so it is never a real cluster's name. This is the Okta page's pattern (okta-tap `specs/spec-okta-v0.md` § Page: Org).
 
-The graph panel pre-bakes twelve scene searches: every cluster; every deployment/trust/resource-plane member with its `BELONGS_TO_CLUSTER` edge; and one search per edge type drawn (`RUNS_ON_COMPUTE`, `STORES_CLUSTER_STATE`, `WRITES_AUDIT_EVENTS`, `UPLOADS_SESSION_RECORDINGS`, `CALLS_AUTH_API`, `DIALS_REVERSE_TUNNEL`, `SIGNS_WITH_KEY`, `SERVES_RESOURCE`, `FRONTS_TARGET`, `TRUSTS_ROOT_CLUSTER`). No search is an unfiltered edge search. Gryphon has no edge-type alternation, so one search per type is the narrowest form.
+- **Both ends in the cluster.** A search that joins two Teleport records runs the path cluster to cluster, `(c)<-[:BELONGS_TO_CLUSTER]-(a)-[:EDGE]->(b)-[:BELONGS_TO_CLUSTER]->(c2)`, both filtered (`CALLS_AUTH_API`, `DIALS_REVERSE_TUNNEL`, `SERVES_RESOURCE`), so a cross-cluster edge never pulls a foreign proxy, auth server or resource onto this cluster's picture. A pattern that reuses one variable to close the loop is not used: Gryphon does not unify a variable bound twice in one pattern. A search whose far end is another platform's record (`RUNS_ON_COMPUTE`, `STORES_CLUSTER_STATE`, `WRITES_AUDIT_EVENTS`, `UPLOADS_SESSION_RECORDINGS`, `SIGNS_WITH_KEY`, `FRONTS_TARGET`) scopes its Teleport end through membership; the open end carries no cluster. `TRUSTS_ROOT_CLUSTER` joins two clusters, so it keeps an edge with the chosen cluster at *either* end and draws the peer.
+- **Every path is linear.** No scene search has a node in the middle of its path that is not a cluster, so none needs the `cluster_name` column filter the Okta page uses for its mid-path nodes.
+
+The graph panel pre-bakes twelve scene searches: the chosen cluster (every cluster when absent); every deployment/trust/resource-plane member of it with its `BELONGS_TO_CLUSTER` edge; and one search per edge type drawn (`RUNS_ON_COMPUTE`, `STORES_CLUSTER_STATE`, `WRITES_AUDIT_EVENTS`, `UPLOADS_SESSION_RECORDINGS`, `CALLS_AUTH_API`, `DIALS_REVERSE_TUNNEL`, `SIGNS_WITH_KEY`, `SERVES_RESOURCE`, `FRONTS_TARGET`, `TRUSTS_ROOT_CLUSTER`). No search is an unfiltered edge search. Gryphon has no edge-type alternation, so one search per type is the narrowest form. A search routed through the cluster also returns the `BELONGS_TO_CLUSTER` edges it walked; the members search draws those edges anyway. The layout still scopes the scene by membership in the browser (`req-teleport-layout-deployment`), so the two agree.
 
 #### Acceptance Criteria
 
@@ -365,6 +369,7 @@ The graph panel pre-bakes twelve scene searches: every cluster; every deployment
 | req-teleport-page-2 | Slots Exact | Implemented | The layout's slots equal the `USES_PANEL` hotlink values. | same |
 | req-teleport-page-3 | Scene Searches Named | Implemented | Every edge type the layout draws is shipped by this plugin and fetched by a search that names it. | same |
 | req-teleport-page-4 | Searches Run | Implemented | Every scene search executes against a seeded design and returns the expected shape. | same |
+| req-teleport-page-6 | Scoped By Cluster Name | Implemented | Every scene search takes `cluster` (default `teleport__teleport_cluster`); with two clusters and an edge of every drawn type crossing between them, each search returns only the named cluster's records, in both directions; `?cluster=a` does not match a cluster named `aba`; absent, every cluster is returned. | `tests/test_teleport_page.py` |
 | req-teleport-page-5 | Renders Live | Proposed | The page renders in a booted stack with the graph drawn and every section filled. | NOT OBSERVED: needs a boot with this plugin's migrations; the layout module itself was executed in headless Chromium against a synthetic scene (see the PR). |
 
 ---
@@ -379,14 +384,14 @@ The reusable layout module that draws one Teleport cluster as a placed picture; 
 
 #### Implementation
 
-`static/teleport/js/projections/teleport-deployment.js` — standard layout module (`execute(context)`). It (1) picks the cluster from `context.inputs.cluster` or the single cluster, else draws a picker; (2) keeps a Teleport record only when its `BELONGS_TO_CLUSTER` edge points at the chosen cluster (fail closed, the board's membership), keeps trusted peer clusters, and removes any non-teleport node left unattached; (3) nests proxies, auth servers and CAs in the cluster box with `projectNested` over `BELONGS_TO_CLUSTER`; (4) places proxies above auth servers, CAs in a column on the right; compute (`RUNS_ON_COMPUTE` targets) left of each tier; KMS/HSM keys (`SIGNS_WITH_KEY`) right of the CAs; peer clusters top-right; state/audit/recording stores in a band beneath; then each agent with the resources it serves and the targets those front; agent compute to the left; (5) draws any node no band accounts for in a row beneath and returns a warning — nothing is dropped. Icon-badge chrome comes from the projection (`node_style.mode = icon-badge`, `lock_nodes`, `min_zoom: fit`).
+`static/teleport/js/projections/teleport-deployment.js` — standard layout module (`execute(context)`). It (1) picks the cluster whose name (its label) equals `context.inputs.cluster`, or the single cluster, else draws a picker (the every-cluster sentinel counts as no input); (2) keeps a Teleport record only when its `BELONGS_TO_CLUSTER` edge points at the chosen cluster (fail closed, the board's membership), keeps trusted peer clusters, and removes any non-teleport node left unattached; (3) nests proxies, auth servers and CAs in the cluster box with `projectNested` over `BELONGS_TO_CLUSTER`; (4) places proxies above auth servers, CAs in a column on the right; compute (`RUNS_ON_COMPUTE` targets) left of each tier; KMS/HSM keys (`SIGNS_WITH_KEY`) right of the CAs; peer clusters top-right; state/audit/recording stores in a band beneath; then each agent with the resources it serves and the targets those front; agent compute to the left; (5) draws any node no band accounts for in a row beneath and returns a warning — nothing is dropped. Icon-badge chrome comes from the projection (`node_style.mode = icon-badge`, `lock_nodes`, `min_zoom: fit`).
 
 #### Acceptance Criteria
 
 | ACID | Title | Status | Description | Notes |
 | --- | --- | :---: | --- | --- |
 | req-teleport-layout-deployment-1 | Names No Instance | Implemented | The module contains no entity id and no instance name. | review |
-| req-teleport-layout-deployment-2 | Scoped To One Cluster | Implemented | With `?cluster=` the other cluster's members and unattached outside nodes leave the scene; with several clusters and none named, only clusters are drawn and a warning says why. | headless Chromium run, 2026-09-22 (PR) |
+| req-teleport-layout-deployment-2 | Scoped To One Cluster | Implemented | With `?cluster=<name>` the other cluster's members and unattached outside nodes leave the scene; with several clusters and none named, only clusters are drawn and a warning says why. | headless Chromium run, 2026-09-22 (PR) |
 | req-teleport-layout-deployment-3 | Nothing Dropped | Implemented | A node no band accounts for is drawn and reported. | code path; not exercised by a scene yet |
 
 ---
@@ -401,7 +406,7 @@ Status: `Implemented`
 
 #### Implementation
 
-`panels/board/__init__.py` (`TeleportBoardPanelType`, slug `teleport-board`, view `teleport/panels/board.html`, css `teleport/css/board.css`), registered in `TeleportConfig.ready()`. `config.section` ∈ `posture`, `roles`, `identity`, `resources`, `requests`, `machines`, `trust`; `config.title`, `config.intro` optional. Reads are Gryphon (`execute_gryphon_raw`), each narrowed by `$cluster` on `cluster_name`, then **scoped by membership**: only records with a `BELONGS_TO_CLUSTER` edge to the chosen cluster are shown (the same membership the graph uses), a record the name column claims but the edge does not is listed in a red note instead of shown, and the section badge reports provenance over the cluster and its members (`design`, or `mixed: n design · m not design`). Folds are pure functions. Sections:
+`panels/board/__init__.py` (`TeleportBoardPanelType`, slug `teleport-board`, view `teleport/panels/board.html`, css `teleport/css/board.css`), registered in `TeleportConfig.ready()`. `config.section` ∈ `posture`, `roles`, `identity`, `resources`, `requests`, `machines`, `trust`; `config.title`, `config.intro` optional. The cluster is resolved from `?cluster=<cluster name>`, matched exactly (the every-cluster sentinel counts as no parameter). Reads are Gryphon (`execute_gryphon_raw`), each narrowed by `$cluster` (the resolved name) on `cluster_name`; a read that joins two Teleport records narrows BOTH ends, by `cluster_name` where the end is typed and through its `BELONGS_TO_CLUSTER` edge to the named cluster where it is not (Gryphon reads a model column only on a labelled variable), so a cross-cluster edge never brings a foreign record in or has it misreported as unlinked; then **scoped by membership**: only records with a `BELONGS_TO_CLUSTER` edge to the chosen cluster are shown (the same membership the graph uses), a record the name column claims but the edge does not is listed in a red note instead of shown, and the section badge reports provenance over the cluster and its members (`design`, or `mixed: n design · m not design`). Folds are pure functions. Sections:
 
 - **posture** — tiles for FIPS, signature suite, local auth, second factor (only `webauthn` is green; `on` admits OTP and warns), device trust, session recording, edition (each good / bad / other / not observed against the FedRAMP expectation it names), version and proxy address; counts of auth servers, proxies, agents, roles, users (SSO vs local; any local is red), bots, pending requests, protected resources.
 - **roles** — per role: logins, label selectors, resources reached (`GRANTS_RESOURCE_ACCESS`), requestable roles with approvals (`PERMITS_ROLE_REQUEST`), session MFA, max TTL, deny present, holders with how granted (`HOLDS_ROLE.granted_by`), SSO mappings and access lists that grant it.
@@ -415,11 +420,12 @@ Status: `Implemented`
 
 | ACID | Title | Status | Description | Notes |
 | --- | --- | :---: | --- | --- |
-| req-teleport-panel-board-1 | Cluster Resolution | Implemented | `?cluster=` wins; one cluster is chosen without it; several without it choose none and list them. | `tests/test_teleport_board.py` |
+| req-teleport-panel-board-1 | Cluster Resolution | Implemented | `?cluster=<name>` wins, matched by name, never by entity id; one cluster is chosen without it; several without it choose none and list them by name. | `tests/test_teleport_board.py` |
 | req-teleport-panel-board-2 | Three States | Implemented | A blank posture field renders "not observed", never a verdict. | same |
 | req-teleport-panel-board-3 | Every Section Renders | Implemented | Each section's context builds from real Gryphon reads over a seeded design and its template renders. | same |
 | req-teleport-panel-board-5 | Membership Is The Edge | Implemented | A record naming the cluster without a membership edge is not shown, and the board names it. | `test_membership_is_the_edge_not_the_name` |
 | req-teleport-panel-board-4 | Grants Folded | Implemented | Role reach, requestable roles, SSO mappings, list grants, local-user and static-token flags, overdue reviews, live requests and CA custody are computed as specified. | same |
+| req-teleport-panel-board-6 | No Other Cluster's Records | Implemented | With a second cluster and every board join crossing between the two, no section shows the other cluster's records and none is reported as unlinked. | `test_no_section_shows_another_clusters_records` |
 
 ---
 
