@@ -14,8 +14,10 @@
  *              target   target     target
  *
  * Everything is derived from the scene; the module names no instance. The cluster is the one the
- * page asked for (`?cluster=<entity_id>`, read from the panel inputs) or, when there is exactly one,
- * that one. A Teleport record stays only when its BELONGS_TO_CLUSTER edge points at that cluster
+ * page asked for by name (`?cluster=<cluster name>`, read from the panel inputs and matched exactly
+ * against each cluster's label, which is its name) or, when there is exactly one, that one. The scene
+ * searches already filter by the same input server-side, so with `?cluster=` the scene holds that
+ * cluster, its members and the peers it trusts or is trusted by. A Teleport record stays only when its BELONGS_TO_CLUSTER edge points at that cluster
  * (fail closed, the same membership the board uses), and any outside node left with no edge to what
  * remains leaves too. With several clusters and no
  * input (or an input naming no cluster) nothing is guessed: the clusters are drawn alone, as a
@@ -138,10 +140,12 @@ export async function execute(context) {
 
 function _chooseCluster(cy, requested, warn) {
     const clusters = cy.nodes(`[entity_type = "${T.cluster}"]`).sort(_byLabel);
-    if (requested) {
-        const hit = cy.getElementById(String(requested));
-        if (!hit.empty() && _type(hit) === T.cluster) return hit;
-        warn("teleport_cluster_not_found", `no Teleport cluster with entity id ${requested} is in the scene`);
+    // The every-cluster sentinel the scene searches default to is no choice at all.
+    const name = requested === T.cluster ? "" : String(requested || "");
+    if (name) {
+        const hit = clusters.filter((n) => String(n.data("label")) === name);
+        if (hit.length === 1) return hit[0];
+        warn("teleport_cluster_not_found", `no Teleport cluster named ${JSON.stringify(name)} is in the scene`);
         return null;
     }
     if (clusters.empty()) {
@@ -156,7 +160,7 @@ function _chooseCluster(cy, requested, warn) {
 }
 
 //: No cluster chosen: draw only the clusters, in a row, each one a way into its own page (the
-//: panel's nav rule opens /teleport?cluster=<entity_id>). The board below says the same in words.
+//: panel's nav rule opens /teleport?cluster=<cluster name>). The board below says the same in words.
 function _picker(cy) {
     cy.remove(cy.nodes().filter((n) => _type(n) !== T.cluster));
     const clusters = cy.nodes().sort(_byLabel);

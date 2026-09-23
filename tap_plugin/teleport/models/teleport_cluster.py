@@ -46,7 +46,8 @@ class TeleportCluster(BaseModel):
     }
 
     FIELD_CRUD_SCHEMA: ClassVar[dict[str, Any]] = {
-        "name": {"type": "string", "minLength": 1},
+        # The type slug is reserved: it is the /teleport page's every-cluster sentinel (req-teleport-page).
+        "name": {"type": "string", "minLength": 1, "not": {"const": "teleport__teleport_cluster"}},
         "proxy_address": {"type": "string"},
         "teleport_version": {"type": "string"},
         "edition": {"type": "string", "enum": ["community", "enterprise", ""]},
@@ -59,7 +60,7 @@ class TeleportCluster(BaseModel):
         "tags": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
-        "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
+        "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1, "not": {"const": "teleport__teleport_cluster"}}},
         "proxy_address": {"validation": "jsonschema", "schema": {"type": "string"}},
         "teleport_version": {"validation": "jsonschema", "schema": {"type": "string"}},
         "edition": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["community", "enterprise", ""]}},

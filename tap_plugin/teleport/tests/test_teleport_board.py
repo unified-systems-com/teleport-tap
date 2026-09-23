@@ -25,7 +25,10 @@ def test_choose_cluster_three_ways() -> None:
     a = {"entity_id": "a", "name": "alpha"}
     b = {"entity_id": "b", "name": "beta"}
     assert choose_cluster([a], "").cluster is a
-    assert choose_cluster([a, b], "b").cluster is b
+    assert choose_cluster([a, b], "beta").cluster is b
+    assert choose_cluster([a, b], "b").cluster is None  # the name, never the entity id
+    assert choose_cluster([a, b], "teleport__teleport_cluster").cluster is None  # the sentinel is no choice
+    assert choose_cluster([a], "teleport__teleport_cluster").cluster is a
     many = choose_cluster([a, b], "")
     assert many.cluster is None and "2 Teleport clusters" in many.message and len(many.others) == 2
     assert choose_cluster([], "").cluster is None
@@ -48,14 +51,14 @@ def _panel(section: str) -> SimpleNamespace:
 
 @pytest.mark.django_db(transaction=True, databases=["default", "search_readonly"])
 def test_every_section_renders_against_a_design() -> None:
-    ids = _design.seed()
+    _design.seed()
     rf = RequestFactory()
     contexts = {}
     for section in SECTIONS:
         # Two clusters on the grid: without ?cluster= the board refuses to guess.
         unpicked = TeleportBoardPanelType.get_view_context(_panel(section), rf.get("/teleport"))
         assert unpicked["cluster"] is None and unpicked["clusters"], section
-        ctx = TeleportBoardPanelType.get_view_context(_panel(section), rf.get("/teleport", {"cluster": ids["cluster"]}))
+        ctx = TeleportBoardPanelType.get_view_context(_panel(section), rf.get("/teleport", {"cluster": _design.CLUSTER}))
         assert ctx["board_error"] is None, (section, ctx["board_error"])
         assert ctx["cluster"]["name"] == "stg" and ctx["provenance"] == "design"
         html = render_to_string(TeleportBoardPanelType.view, ctx)
@@ -92,15 +95,16 @@ def test_every_section_renders_against_a_design() -> None:
     cas = {c["type"]: c for c in trust["cas"]}
     assert cas["host"]["storage_tone"] == "good" and cas["db"]["phase"] == NOT_OBSERVED
     assert trust["trusts"][0]["direction"] == "leaf" and trust["trusts"][0]["peer"] == "leaf"
+    assert 'href="?cluster=leaf"' in render_to_string(TeleportBoardPanelType.view, trust)
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "search_readonly"])
 def test_membership_is_the_edge_not_the_name() -> None:
     """A record that names the cluster but has no BELONGS_TO_CLUSTER edge to it is not shown, and the
     board says so — the board and the graph scope by the same membership."""
-    ids = _design.seed()
+    _design.seed()
     _design.node("teleport__teleport_user", {"name": "stray", "cluster_name": "stg", "user_type": "local"})
-    ctx = TeleportBoardPanelType.get_view_context(_panel("identity"), RequestFactory().get("/teleport", {"cluster": ids["cluster"]}))
+    ctx = TeleportBoardPanelType.get_view_context(_panel("identity"), RequestFactory().get("/teleport", {"cluster": _design.CLUSTER}))
     assert ctx["local_users"] == ["breakglass"]
     assert ctx["unlinked"] == ["stray (teleport_user)"]
     assert ctx["provenance"] == "design"  # provenance counts members only; the stray is not one
@@ -114,3 +118,22 @@ def test_single_cluster_is_chosen_without_a_parameter() -> None:
     ctx = TeleportBoardPanelType.get_view_context(_panel("posture"), RequestFactory().get("/teleport"))
     assert ctx["cluster"]["name"] == "only"
     assert all(t.tone == "unknown" for t in ctx["tiles"])
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "search_readonly"])
+def test_no_section_shows_another_clusters_records() -> None:
+    """req-teleport-panel-board-6: with a second cluster and every board join crossing between them, stg's sections show none of
+    prod's records, and none is misreported as an unlinked stg record."""
+    ids = _design.seed()
+    _design.seed_second(ids, open_ends=False)
+    rf = RequestFactory()
+    for section in SECTIONS:
+        ctx = TeleportBoardPanelType.get_view_context(_panel(section), rf.get("/teleport", {"cluster": _design.CLUSTER}))
+        assert ctx["board_error"] is None, (section, ctx["board_error"])
+        assert ctx["unlinked"] == [], (section, ctx["unlinked"])
+        html = render_to_string(TeleportBoardPanelType.view, ctx)
+        leaked = [w for w in ("prod-", "Prod list") if w in html]
+        assert not leaked, (section, leaked)
+    prod = TeleportBoardPanelType.get_view_context(_panel("roles"), rf.get("/teleport", {"cluster": _design.OTHER}))
+    assert [r.name for r in prod["roles"]] == ["prod-role"]
+    assert prod["roles"][0].held_by == [] and prod["roles"][0].via_lists == []

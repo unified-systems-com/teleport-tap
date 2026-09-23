@@ -47,7 +47,7 @@ Vendor-specific. Other access brokers (HashiCorp Boundary, StrongDM, Tailscale) 
 
 ## Fields
 
-- `name` — The cluster name (`auth_service.cluster_name`), which Teleport stamps into every host and user certificate. Required and the natural key.
+- `name` — The cluster name (`auth_service.cluster_name`), which Teleport stamps into every host and user certificate. Required and the natural key, and the value every member's `cluster_name` carries. The value `teleport__teleport_cluster` is refused: the /teleport page uses the type's own slug as its every-cluster sentinel.
 - `proxy_address` — The public address of the Proxy Service (host:port) users and agents dial. Blank until observed.
 - `teleport_version` — The Teleport version the Auth Service reports (`tctl status`). Blank until observed.
 - `edition` — Which build runs the cluster: `community` or `enterprise`. FedRAMP-relevant features (FIPS builds, HSM/KMS key storage, device trust, access lists) are Enterprise-only. Blank until observed.

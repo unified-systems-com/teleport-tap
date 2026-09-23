@@ -31,8 +31,8 @@ def edge(src: str, dst: str, edge_type: str, properties: dict[str, Any] | None =
     assert result.success, result
 
 
-def member(type_slug: str, payload: dict[str, Any], cluster_id: str) -> str:
-    eid = node(type_slug, {"cluster_name": CLUSTER, **payload}, {"dcom": "design"})
+def member(type_slug: str, payload: dict[str, Any], cluster_id: str, cluster_name: str = CLUSTER) -> str:
+    eid = node(type_slug, {"cluster_name": cluster_name, **payload}, {"dcom": "design"})
     edge(eid, cluster_id, "BELONGS_TO_CLUSTER__teleport")
     return eid
 
@@ -82,3 +82,78 @@ def seed() -> dict[str, str]:
     edge(ids["alice"], ids["req"], "RAISES_ACCESS_REQUEST__teleport")
     edge(ids["req"], ids["admin"], "REQUESTS_ROLE__teleport")
     return ids
+
+
+OTHER = "prod"
+
+
+def outside(label: str) -> str:
+    """A stand-in for another platform's record at an edge's open end (an EC2 instance, a DynamoDB
+    table, a KMS key). teleport's tests depend on no other plugin, so it is a teleport user that
+    belongs to no cluster; only the scene searches' open ends read it."""
+    return node("teleport__teleport_user", {"name": label, "cluster_name": "outside"})
+
+
+def seed_second(ids: dict[str, str], open_ends: bool = True) -> dict[str, str]:
+    """A second cluster, ``prod``, beside the ``stg`` design from :func:`seed`, with an edge of every
+    drawn type and every board join crossing between the two. Nothing of prod's may appear on stg's
+    page, nor stg's on prod's. Adds its ids to ``ids`` with a ``prod-`` prefix and returns them.
+
+    ``open_ends`` also gives each cluster a stand-in (:func:`outside`) at every open-end edge, for the
+    scene searches; the board leaves it off, because it reports a Teleport-typed record that belongs to
+    no cluster, which is what the stand-in is."""
+    o = ids["prod-cluster"] = node("teleport__teleport_cluster", {"name": OTHER})
+
+    def m(key: str, type_slug: str, payload: dict[str, Any]) -> str:
+        ids[key] = member(type_slug, payload, o, OTHER)
+        return ids[key]
+
+    m("prod-auth", "teleport__teleport_auth_server", {"name": "prod-auth"})
+    m("prod-proxy", "teleport__teleport_proxy_server", {"name": "prod-proxy"})
+    m("prod-agent", "teleport__teleport_agent", {"name": "prod-agent"})
+    m("prod-db", "teleport__teleport_database", {"name": "prod-db"})
+    m("prod-ca", "teleport__teleport_certificate_authority", {"ca_type": "host"})
+    m("prod-role", "teleport__teleport_role", {"name": "prod-role"})
+    m("prod-user", "teleport__teleport_user", {"name": "prod-user", "user_type": "sso"})
+    m("prod-bot", "teleport__teleport_bot", {"name": "prod-bot"})
+    m("prod-token", "teleport__teleport_join_token", {"name": "prod-token", "join_method": "iam"})
+    m("prod-list", "teleport__teleport_access_list", {"name": "prod-list", "title": "Prod list"})
+    m("prod-req", "teleport__teleport_access_request", {"name": "prod-req", "state": "PENDING"})
+    m("prod-saml", "teleport__teleport_sso_connector", {"name": "prod-saml", "kind": "saml"})
+    # Each cluster's own open-end targets, so every open-end search has something to find.
+    for pre, auth, agent, ca, res in (("stg", "auth-a", "agent", "ca-host", "db"), ("prod", "prod-auth", "prod-agent", "prod-ca", "prod-db"))[: 2 if open_ends else 0]:
+        for et in ("RUNS_ON_COMPUTE", "STORES_CLUSTER_STATE", "WRITES_AUDIT_EVENTS", "UPLOADS_SESSION_RECORDINGS"):
+            ids[f"{pre}-{et}"] = outside(f"{pre} {et.lower()} target")
+            edge(ids[auth], ids[f"{pre}-{et}"], f"{et}__teleport")
+        ids[f"{pre}-key"] = outside(f"{pre} kms key")
+        edge(ids[ca], ids[f"{pre}-key"], "SIGNS_WITH_KEY__teleport")
+        ids[f"{pre}-target"] = outside(f"{pre} rds instance")
+        edge(ids[res], ids[f"{pre}-target"], "FRONTS_TARGET__teleport")
+        ids[f"{pre}-agent-host"] = outside(f"{pre} agent host")
+        edge(ids[agent], ids[f"{pre}-agent-host"], "RUNS_ON_COMPUTE__teleport")
+    # prod's own deployment edges, so its page draws each type too.
+    edge(ids["prod-proxy"], ids["prod-auth"], "CALLS_AUTH_API__teleport")
+    edge(ids["prod-agent"], ids["prod-proxy"], "DIALS_REVERSE_TUNNEL__teleport")
+    edge(ids["prod-agent"], ids["prod-db"], "SERVES_RESOURCE__teleport")
+    # Cross-cluster edges, both directions, one per drawn edge type and board join.
+    edge(ids["proxy-a"], ids["prod-auth"], "CALLS_AUTH_API__teleport")
+    edge(ids["prod-proxy"], ids["auth-a"], "CALLS_AUTH_API__teleport")
+    edge(ids["prod-agent"], ids["proxy-a"], "DIALS_REVERSE_TUNNEL__teleport")
+    edge(ids["agent"], ids["prod-db"], "SERVES_RESOURCE__teleport")
+    edge(ids["prod-agent"], ids["db"], "SERVES_RESOURCE__teleport")
+    edge(ids["access"], ids["prod-db"], "GRANTS_RESOURCE_ACCESS__teleport")
+    edge(ids["access"], ids["prod-role"], "PERMITS_ROLE_REQUEST__teleport")
+    edge(ids["prod-user"], ids["access"], "HOLDS_ROLE__teleport", {"granted_by": "static"})
+    edge(ids["prod-bot"], ids["access"], "HOLDS_ROLE__teleport", {"granted_by": "static"})
+    edge(ids["bot"], ids["prod-role"], "HOLDS_ROLE__teleport", {"granted_by": "static"})
+    edge(ids["prod-saml"], ids["access"], "MAPS_TO_ROLE__teleport", {"attribute": "groups", "value": "x"})
+    edge(ids["prod-list"], ids["access"], "GRANTS_ROLE__teleport", {"audience": "member"})
+    edge(ids["list"], ids["prod-role"], "GRANTS_ROLE__teleport", {"audience": "member"})
+    edge(ids["prod-user"], ids["list"], "MEMBER_OF_ACCESS_LIST__teleport", {"membership": "member"})
+    edge(ids["prod-user"], ids["req"], "REVIEWED_ACCESS_REQUEST__teleport", {"proposal": "approve"})
+    edge(ids["alice"], ids["prod-req"], "RAISES_ACCESS_REQUEST__teleport")
+    edge(ids["req"], ids["prod-role"], "REQUESTS_ROLE__teleport")
+    edge(ids["req"], ids["prod-db"], "REQUESTS_RESOURCE__teleport")
+    edge(ids["bot"], ids["prod-token"], "JOINS_WITH_TOKEN__teleport")
+    edge(ids["prod-bot"], ids["token"], "JOINS_WITH_TOKEN__teleport")
+    return {k: v for k, v in ids.items() if k.startswith("prod")}
