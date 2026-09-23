@@ -50,20 +50,17 @@ class TeleportKubeCluster(BaseModel):
         "name": {"type": "string", "minLength": 1},
         "cluster_name": {"type": "string", "minLength": 1},
         "labels": {"type": "object"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "labels": {"validation": "jsonschema", "schema": {"type": "object"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
 
     name = models.CharField(max_length=512, blank=True, default="", db_index=True)
     cluster_name = models.CharField(max_length=512, blank=True, default="", db_index=True)
     labels = models.JSONField(default=dict, blank=True)
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_kube_cluster"

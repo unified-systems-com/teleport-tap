@@ -18,6 +18,7 @@ See `teleport_ssh_node`.
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the RDS instance or table (reached by `FRONTS_TARGET`).
 - Not database objects (`db_object`) — Backlog.
 
@@ -48,4 +49,3 @@ Vendor-specific record of a neutral thing.
 - `protocol` — The wire protocol (`postgres`, `mysql`, `mongodb`, `redis`, `dynamodb` …). Blank until observed.
 - `uri` — The endpoint the Database Service connects to. Blank until observed.
 - `labels` — The resource's labels (static `metadata.labels` plus the latest dynamic command-label values), as a flat string map. Role `*_labels` selectors match against these, which is how access is granted; empty means not observed, not unlabelled.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

@@ -52,7 +52,6 @@ class TeleportProxyServer(BaseModel):
         "host_id": {"type": "string"},
         "teleport_version": {"type": "string"},
         "public_addr": {"type": "string"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
@@ -60,7 +59,6 @@ class TeleportProxyServer(BaseModel):
         "host_id": {"validation": "jsonschema", "schema": {"type": "string"}},
         "teleport_version": {"validation": "jsonschema", "schema": {"type": "string"}},
         "public_addr": {"validation": "jsonschema", "schema": {"type": "string"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
 
@@ -69,7 +67,6 @@ class TeleportProxyServer(BaseModel):
     host_id = models.CharField(max_length=512, blank=True, default="", db_index=True)
     teleport_version = models.CharField(max_length=512, blank=True, default="")
     public_addr = models.CharField(max_length=512, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_proxy_server"

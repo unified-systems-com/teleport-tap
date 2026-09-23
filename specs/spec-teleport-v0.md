@@ -122,6 +122,7 @@ The corpus documents: this section, the tail catalogs, and one domain article pe
 | --- | --- | :---: | --- | --- |
 | req-teleport-vocabulary-1 | Every Type Articled | Implemented | Every registered node type, edge type and the `teleport.plane` dimension has a conforming, field-complete domain article (core's `domain-article-coverage` guard finds nothing). | Checked with `tap.domain_articles.findings_for_root`: 45 subjects (18 nodes, 26 edges, 1 dimension), 0 findings. |
 | req-teleport-vocabulary-2 | Rejections Recorded | Implemented | Every candidate the survey considered and did not model is in the table above with its reason. | |
+| req-teleport-vocabulary-3 | No Free-Form Record | Implemented | No type declares `configuration` (migration `0003_drop_unused_configuration` removed it), and a `create_node` write carrying it is refused. | `tests/test_teleport_models.py` |
 
 ---
 
@@ -156,7 +157,7 @@ The cluster: the outer node, and the home of the cluster-wide settings an assess
 
 #### Implementation
 
-`models/teleport_cluster.py` — `TeleportCluster`, `teleport__teleport_cluster`, icon `teleport-cluster`, plane `deployment`, `NATURAL_KEY = ("name",)` (the cluster name is set once and baked into every certificate, so it is Teleport's own stable identity). Fields: `name` (required), `proxy_address`, `teleport_version`, `edition`, `fips`, `signature_algorithm_suite`, `local_auth`, `second_factor`, `device_trust_mode`, `session_recording_mode`, `configuration`, `tags`. Every enum admits `""` (not observed). Field meanings: `domain/teleport_cluster.md`.
+`models/teleport_cluster.py` — `TeleportCluster`, `teleport__teleport_cluster`, icon `teleport-cluster`, plane `deployment`, `NATURAL_KEY = ("name",)` (the cluster name is set once and baked into every certificate, so it is Teleport's own stable identity). Fields: `name` (required), `proxy_address`, `teleport_version`, `edition`, `fips`, `signature_algorithm_suite`, `local_auth`, `second_factor`, `device_trust_mode`, `session_recording_mode`, `tags`. Every enum admits `""` (not observed). Field meanings: `domain/teleport_cluster.md`.
 
 #### Acceptance Criteria
 
@@ -179,7 +180,7 @@ The processes that make up a running cluster. In Teleport's HA reference the Aut
 
 #### Implementation
 
-| Model | Entity type | Key | Fields beyond `name`, `cluster_name`, `configuration` |
+| Model | Entity type | Key | Fields beyond `name`, `cluster_name` |
 | --- | --- | --- | --- |
 | `TeleportAuthServer` | `teleport__teleport_auth_server` | `(cluster_name, name)` | `host_id`, `teleport_version` |
 | `TeleportProxyServer` | `teleport__teleport_proxy_server` | `(cluster_name, name)` | `host_id`, `teleport_version`, `public_addr` |
@@ -206,7 +207,7 @@ One of the cluster's CAs, with where its private key lives and where it is in ro
 
 #### Implementation
 
-`models/teleport_certificate_authority.py` — `teleport__teleport_certificate_authority`, plane `trust`, `NATURAL_KEY = ("cluster_name", "ca_type")` (one CA per type per cluster, named after the cluster by Teleport itself). Fields: `cluster_name`, `ca_type` (host, user, db, db_client, openssh, jwt, saml_idp, oidc_idp, spiffe, okta, awsra), `rotation_phase` (standby, init, update_clients, update_servers, rollback), `last_rotated_at`, `key_storage` (software, aws_kms, gcp_kms, pkcs11), `configuration`. The key a CA signs with, when it is outside the backend, is the `SIGNS_WITH_KEY` edge.
+`models/teleport_certificate_authority.py` — `teleport__teleport_certificate_authority`, plane `trust`, `NATURAL_KEY = ("cluster_name", "ca_type")` (one CA per type per cluster, named after the cluster by Teleport itself). Fields: `cluster_name`, `ca_type` (host, user, db, db_client, openssh, jwt, saml_idp, oidc_idp, spiffe, okta, awsra), `rotation_phase` (standby, init, update_clients, update_servers, rollback), `last_rotated_at`, `key_storage` (software, aws_kms, gcp_kms, pkcs11). The key a CA signs with, when it is outside the backend, is the `SIGNS_WITH_KEY` edge.
 
 #### Acceptance Criteria
 
@@ -281,7 +282,7 @@ What the cluster protects. Grouped on the page by kind and label, because labels
 
 #### Implementation
 
-| Model | Entity type | Key | Fields beyond `cluster_name`, `labels`, `configuration` |
+| Model | Entity type | Key | Fields beyond `cluster_name`, `labels` |
 | --- | --- | --- | --- |
 | `TeleportSshNode` | `teleport__teleport_ssh_node` | `(cluster_name, hostname)` | `hostname`, `host_id`, `addr`, `sub_kind` (teleport, openssh, openssh-ec2-ice) |
 | `TeleportKubeCluster` | `teleport__teleport_kube_cluster` | `(cluster_name, name)` | `name` |
@@ -474,7 +475,7 @@ Status: `Implemented`
 - **The cloud underneath** — EC2, ECS, load balancers, DynamoDB, S3, KMS belong to the cloud plugin (aws_core); teleport reaches them by open-ended edges.
 - **The identity provider** — Okta, Entra, GitHub identities belong to their plugins or to identity_core; teleport reaches them by `DELEGATES_LOGIN`.
 - **A specific deployment** — the staging cluster's names, instances and tables are an instance plugin's design seed (highbar), never this plugin's GRIFT.
-- **Secrets** — no join-token value, key material or credential is ever a field.
+- **Secrets** — no join-token value, key material or credential is ever a field. No type has a free-form `configuration` field either: the resources Teleport keeps can carry secret material and personal data (a CA's key material, an SSO connector's client secret, a user's traits), and no collector exists to fill one, so only promoted columns are stored and a resource cannot be passed through whole.
 
 ## Model catalog
 

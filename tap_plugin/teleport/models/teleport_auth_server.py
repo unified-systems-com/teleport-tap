@@ -53,14 +53,12 @@ class TeleportAuthServer(BaseModel):
         "cluster_name": {"type": "string", "minLength": 1},
         "host_id": {"type": "string"},
         "teleport_version": {"type": "string"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "host_id": {"validation": "jsonschema", "schema": {"type": "string"}},
         "teleport_version": {"validation": "jsonschema", "schema": {"type": "string"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
 
@@ -68,7 +66,6 @@ class TeleportAuthServer(BaseModel):
     cluster_name = models.CharField(max_length=512, blank=True, default="", db_index=True)
     host_id = models.CharField(max_length=512, blank=True, default="", db_index=True)
     teleport_version = models.CharField(max_length=512, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_auth_server"

@@ -19,6 +19,7 @@ Teleport's HA guide runs the Auth Service as a small pool (at most two readers o
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the auto-scaling group or launch template that keeps the pool alive — those are cloud nodes.
 - Not the CA keys themselves: `teleport_certificate_authority`.
 
@@ -48,4 +49,3 @@ Vendor-specific (Teleport's Auth Service).
 - `cluster_name` — The name of the Teleport cluster this record lives in — the same string as that cluster node's `name`. Part of the natural key because Teleport's names are unique only within one cluster (every cluster ships preset roles called `access`, `editor` and `auditor`). The traversable form of the same membership is the `BELONGS_TO_CLUSTER` edge; this column is what the key rests on (a key must be a column the generated search can filter).
 - `host_id` — The host UUID Teleport assigns on first start and stamps into the instance's host certificate. Blank until observed; the future key.
 - `teleport_version` — The Teleport version this process runs (instance inventory). Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

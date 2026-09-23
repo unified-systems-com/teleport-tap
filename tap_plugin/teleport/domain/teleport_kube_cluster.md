@@ -18,6 +18,7 @@ See `teleport_ssh_node`: a protected resource, grouped by label, reached by role
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the EKS cluster itself (reached by `FRONTS_TARGET`).
 - Not Kubernetes RBAC inside the cluster.
 
@@ -46,4 +47,3 @@ Vendor-specific record of a neutral thing.
 - `name` — The Kubernetes cluster's name in Teleport. Required.
 - `cluster_name` — The name of the Teleport cluster this record lives in — the same string as that cluster node's `name`. Part of the natural key because Teleport's names are unique only within one cluster (every cluster ships preset roles called `access`, `editor` and `auditor`). The traversable form of the same membership is the `BELONGS_TO_CLUSTER` edge; this column is what the key rests on (a key must be a column the generated search can filter).
 - `labels` — The resource's labels (static `metadata.labels` plus the latest dynamic command-label values), as a flat string map. Role `*_labels` selectors match against these, which is how access is granted; empty means not observed, not unlabelled.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

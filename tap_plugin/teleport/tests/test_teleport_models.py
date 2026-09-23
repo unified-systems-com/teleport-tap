@@ -113,3 +113,21 @@ def test_enum_refuses_an_unknown_value() -> None:
     assert ok.success
     assert _create("teleport__teleport_cluster", {"name": "b", "fips": "enabled"}).success
     assert not _create("teleport__teleport_cluster", {"name": "c", "fips": "yes"}).success
+
+
+@pytest.mark.parametrize("type_slug", sorted(MINIMAL))
+def test_no_free_form_record(type_slug: str) -> None:
+    """req-teleport-vocabulary-3: no type declares a free-form `configuration` field."""
+    model = _model(type_slug)
+    assert "configuration" not in model.FIELD_CRUD_SCHEMA
+    assert "configuration" not in model.FIELD_VALIDATION_SCHEMA
+    assert "configuration" not in {f.name for f in model._meta.get_fields()}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("type_slug", sorted(MINIMAL))
+def test_configuration_write_is_refused(type_slug: str) -> None:
+    """req-teleport-vocabulary-3: a create_node write carrying `configuration` is refused, so a resource
+    cannot be passed through whole."""
+    payload, _plane = MINIMAL[type_slug]
+    assert not _create(type_slug, {**payload, "configuration": {"client_secret": "sentinel"}}).success

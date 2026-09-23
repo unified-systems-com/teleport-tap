@@ -48,14 +48,12 @@ class TeleportBot(BaseModel):
         "cluster_name": {"type": "string", "minLength": 1},
         "max_session_ttl": {"type": "string"},
         "traits": {"type": "object"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "max_session_ttl": {"validation": "jsonschema", "schema": {"type": "string"}},
         "traits": {"validation": "jsonschema", "schema": {"type": "object"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
 
@@ -63,7 +61,6 @@ class TeleportBot(BaseModel):
     cluster_name = models.CharField(max_length=512, blank=True, default="", db_index=True)
     max_session_ttl = models.CharField(max_length=512, blank=True, default="")
     traits = models.JSONField(default=dict, blank=True)
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_bot"

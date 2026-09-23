@@ -56,7 +56,6 @@ class TeleportCluster(BaseModel):
         "second_factor": {"type": "string"},
         "device_trust_mode": {"type": "string", "enum": ["off", "optional", "required", ""]},
         "session_recording_mode": {"type": "string", "enum": ["node", "node-sync", "proxy", "proxy-sync", "off", ""]},
-        "configuration": {"type": "object"},
         "tags": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
@@ -70,7 +69,6 @@ class TeleportCluster(BaseModel):
         "second_factor": {"validation": "jsonschema", "schema": {"type": "string"}},
         "device_trust_mode": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["off", "optional", "required", ""]}},
         "session_recording_mode": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["node", "node-sync", "proxy", "proxy-sync", "off", ""]}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
         "tags": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name']
@@ -85,7 +83,6 @@ class TeleportCluster(BaseModel):
     second_factor = models.CharField(max_length=512, blank=True, default="")
     device_trust_mode = models.CharField(max_length=64, blank=True, default="")
     session_recording_mode = models.CharField(max_length=64, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
     tags = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):

@@ -53,7 +53,6 @@ class TeleportSshNode(BaseModel):
         "addr": {"type": "string"},
         "sub_kind": {"type": "string", "enum": ["teleport", "openssh", "openssh-ec2-ice", ""]},
         "labels": {"type": "object"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "hostname": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
@@ -62,7 +61,6 @@ class TeleportSshNode(BaseModel):
         "addr": {"validation": "jsonschema", "schema": {"type": "string"}},
         "sub_kind": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["teleport", "openssh", "openssh-ec2-ice", ""]}},
         "labels": {"validation": "jsonschema", "schema": {"type": "object"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['hostname', 'cluster_name']
 
@@ -72,7 +70,6 @@ class TeleportSshNode(BaseModel):
     addr = models.CharField(max_length=512, blank=True, default="")
     sub_kind = models.CharField(max_length=64, blank=True, default="")
     labels = models.JSONField(default=dict, blank=True)
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_ssh_node"

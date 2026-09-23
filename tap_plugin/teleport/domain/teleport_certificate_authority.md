@@ -19,6 +19,7 @@ Certificates are Teleport's whole security model: whoever holds a CA key can min
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the issued certificates — short-lived and never stored.
 - Not a trusted cluster's copy of another cluster's CA; cross-cluster trust is the `TRUSTS_ROOT_CLUSTER` edge.
 
@@ -49,4 +50,3 @@ Vendor-specific. The CA-type set and rotation phases are Teleport's.
 - `rotation_phase` — Where the CA is in Teleport's rotation state machine (`tctl status`). `standby` is at rest; any other value is a rotation in flight. Blank until observed.
 - `last_rotated_at` — When the last rotation completed (ISO-8601). Blank until observed — and blank is not "never rotated".
 - `key_storage` — Where the CA's active private keys live: in the backend (`software`), in AWS KMS or GCP KMS (`ca_key_params`), or in an HSM over PKCS#11. Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.
