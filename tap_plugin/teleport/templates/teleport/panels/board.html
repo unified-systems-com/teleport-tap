@@ -1,0 +1,142 @@
+{% comment %}
+teleport-board — req-teleport-panel-board. One section of the /teleport operator page for one
+cluster. Every cell that holds a blank field says "not observed" in grey: blank is never read as a
+pass or a fail. Text carries every state; colour is a second channel.
+{% endcomment %}
+<section class="tpb tpb--{{ section }}" aria-label="{{ title }}">
+  <header class="tpb-head">
+    <h2 class="tpb-title">{{ title }}{% if cluster %} <span class="tpb-cluster">· {{ cluster.name }}</span>{% endif %}</h2>
+    {% if cluster.design %}<span class="tpb-design" title="Every row on this board comes from design nodes (dcom=design): planned, not built or observed.">design</span>{% endif %}
+    {% if intro %}<p class="tpb-intro">{{ intro }}</p>{% endif %}
+  </header>
+
+  {% if board_error %}
+    <p class="tpb-error">{{ board_error }}</p>
+  {% elif not cluster %}
+    <p class="tpb-empty">{{ choice_message }}
+      {% for c in clusters %}<a class="tpb-pick" href="?cluster={{ c.entity_id }}">{{ c.name }}</a>{% endfor %}
+    </p>
+  {% elif section == "posture" %}
+    <div class="tpb-tiles" role="list">
+      {% for t in tiles %}
+        <div class="tpb-tile tpb-tone--{{ t.tone }}" role="listitem" title="{{ t.note }}">
+          <span class="tpb-tile-label">{{ t.label }}</span>
+          <span class="tpb-tile-value">{% if t.tone == "good" %}✓ {% elif t.tone == "bad" %}✕ {% elif t.tone == "warn" %}! {% elif t.tone == "unknown" %}? {% endif %}{{ t.value }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <p class="tpb-inventory">
+      {% for i in inventory %}<span class="tpb-inv{% if i.tone %} tpb-tone--{{ i.tone }}{% endif %}"><b>{{ i.count }}</b> {{ i.label }}{% if i.detail %} <small>({{ i.detail }})</small>{% endif %}</span>{% endfor %}
+    </p>
+    {% if clusters %}<p class="tpb-note">Other clusters: {% for c in clusters %}<a class="tpb-pick" href="?cluster={{ c.entity_id }}">{{ c.name }}</a>{% endfor %}</p>{% endif %}
+  {% elif section == "roles" %}
+    {% if roles %}
+    <div class="tpb-scroll"><table class="tpb-table">
+      <thead><tr><th>Role</th><th>Logins</th><th>Label selectors</th><th title="Protected resources this role reaches (GRANTS_RESOURCE_ACCESS)">Reaches</th><th title="Roles holders may request (PERMITS_ROLE_REQUEST)">May request</th><th>Session MFA</th><th>Max TTL</th><th>Deny rules</th><th>Held by</th><th>Granted by</th></tr></thead>
+      <tbody>
+      {% for r in roles %}
+        <tr>
+          <td class="tpb-strong">{{ r.name }}{% if r.origin %} <span class="tpb-tag">{{ r.origin }}</span>{% endif %}</td>
+          {% if r.observed %}
+            <td>{{ r.logins|join:", "|default:"—" }}</td>
+            <td>{% for s in r.selectors %}<div class="tpb-mono">{{ s }}</div>{% empty %}—{% endfor %}</td>
+          {% else %}
+            <td class="tpb-no" colspan="2">rules not observed</td>
+          {% endif %}
+          <td>{{ r.reach_text|default:"—" }}</td>
+          <td>{{ r.requestable|join:", "|default:"—" }}</td>
+          <td>{% if r.observed %}{{ r.session_mfa|default:"—" }}{% else %}<span class="tpb-no">not observed</span>{% endif %}</td>
+          <td>{% if r.observed %}{{ r.max_ttl|default:"—" }}{% else %}<span class="tpb-no">not observed</span>{% endif %}</td>
+          <td>{% if r.has_deny is None %}<span class="tpb-no">not observed</span>{% elif r.has_deny %}yes{% else %}none{% endif %}</td>
+          <td>{% for h in r.held_by %}<div>{{ h }}</div>{% empty %}—{% endfor %}</td>
+          <td>{% for m in r.mapped_from %}<div>SSO {{ m }}</div>{% endfor %}{% for l in r.via_lists %}<div>list {{ l }}</div>{% endfor %}{% if not r.mapped_from and not r.via_lists %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="tpb-note">"—" means the grid holds no such edge or value for the role. Reach is derived from label selectors against resource labels; a role with no reach edge may still match resources whose labels were not observed.</p>
+    {% else %}<p class="tpb-empty">No roles on the grid for this cluster.</p>{% endif %}
+  {% elif section == "identity" %}
+    <div class="tpb-cols">
+      <div class="tpb-card">
+        <h3>SSO connectors</h3>
+        {% if connectors %}
+        <table class="tpb-table"><thead><tr><th>Connector</th><th>Kind</th><th>Identity provider</th></tr></thead><tbody>
+          {% for c in connectors %}<tr><td class="tpb-strong">{{ c.name }}{% if c.display %} <small>“{{ c.display }}”</small>{% endif %}</td><td>{{ c.kind|upper }}</td><td>{{ c.idp|default:"" }}{% if c.idp_url %}<div class="tpb-mono tpb-dim">{{ c.idp_url }}</div>{% elif not c.idp %}<span class="tpb-no">not observed</span>{% endif %}</td></tr>{% endfor %}
+        </tbody></table>
+        {% else %}<p class="tpb-empty">No SSO connector on the grid — with local auth off nobody can log in.</p>{% endif %}
+      </div>
+      <div class="tpb-card">
+        <h3>Users</h3>
+        <p class="tpb-inventory"><span class="tpb-inv"><b>{{ user_total }}</b> total</span>{% for k, v in user_by_type.items %}<span class="tpb-inv{% if k == 'local' %} tpb-tone--bad{% elif k == 'unknown' %} tpb-tone--unknown{% endif %}"><b>{{ v }}</b> {% if k == 'unknown' %}type not observed{% else %}{{ k }}{% endif %}</span>{% endfor %}</p>
+        {% if local_users %}<p class="tpb-note">Local accounts (bypass the IdP): {{ local_users|join:", " }}</p>{% endif %}
+        <h3>Trusted devices</h3>
+        <p class="tpb-inventory"><span class="tpb-inv"><b>{{ devices.total }}</b> registered</span><span class="tpb-inv tpb-tone--good"><b>{{ devices.enrolled }}</b> enrolled</span>{% if devices.unknown %}<span class="tpb-inv tpb-tone--unknown"><b>{{ devices.unknown }}</b> not observed</span>{% endif %}</p>
+      </div>
+    </div>
+    <div class="tpb-card">
+      <h3>Access lists <small>periodic access review</small></h3>
+      {% if access_lists %}
+      <table class="tpb-table"><thead><tr><th>List</th><th>Grants roles</th><th>Owners</th><th>Members</th><th>Review every</th><th>Next review</th></tr></thead><tbody>
+        {% for l in access_lists %}<tr><td class="tpb-strong">{{ l.title }}</td><td>{{ l.roles|default:"—" }}</td><td class="tpb-num">{{ l.owners }}</td><td class="tpb-num">{{ l.members }}</td><td>{{ l.frequency|default:"—" }}</td><td class="tpb-tone--{{ l.due_tone }}">{{ l.due_text }}</td></tr>{% endfor %}
+      </tbody></table>
+      {% else %}<p class="tpb-empty">No access lists on the grid for this cluster.</p>{% endif %}
+    </div>
+  {% elif section == "resources" %}
+    <div class="tpb-kinds">
+      {% for g in groups %}<span class="tpb-inv"><b>{{ g.rows|length }}</b> {{ g.kind }}{{ g.rows|length|pluralize }}</span>{% endfor %}
+    </div>
+    {% for g in groups %}{% if g.rows %}
+      <div class="tpb-card">
+        <h3>{{ g.kind }}s</h3>
+        {% if g.labels %}<p class="tpb-labels">{% for lab, n in g.labels %}<span class="tpb-label">{{ lab }} <b>{{ n }}</b></span>{% endfor %}</p>{% endif %}
+        <table class="tpb-table"><thead><tr><th>Name</th><th>Detail</th><th>Labels</th><th>Served by</th><th>Reached by</th></tr></thead><tbody>
+          {% for r in g.rows %}<tr><td class="tpb-strong">{{ r.name }}</td><td class="tpb-mono">{{ r.detail|default:"" }}</td><td>{% for lab in r.labels %}<span class="tpb-label">{{ lab }}</span>{% empty %}<span class="tpb-no">not observed</span>{% endfor %}</td><td>{{ r.served_by|default:"—" }}</td><td>{% for w in r.reached_by %}<div>{{ w }}</div>{% empty %}—{% endfor %}</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+    {% endif %}{% endfor %}
+  {% elif section == "requests" %}
+    {% if requests %}
+    <table class="tpb-table"><thead><tr><th>State</th><th>Requester</th><th>Wants</th><th>Reason</th><th>Raised</th><th>Expires</th><th>Reviews</th></tr></thead><tbody>
+      {% for q in requests %}<tr><td class="{% if q.state == 'PENDING' %}tpb-tone--warn{% else %}tpb-tone--info{% endif %}">{{ q.state }}</td><td class="tpb-strong">{{ q.requester|default:"—" }}</td><td>{{ q.wants|default:"—" }}</td><td>{{ q.reason|default:"—" }}</td><td>{{ q.age|default:"—" }}</td><td>{{ q.expires|default:"—" }}</td><td>{% for r in q.reviews %}<div>{{ r }}</div>{% empty %}none yet{% endfor %}</td></tr>{% endfor %}
+    </tbody></table>
+    {% else %}<p class="tpb-empty">No pending or active access requests on the grid for this cluster.</p>{% endif %}
+    <p class="tpb-note">Pending requests, and approved requests whose access has not expired. Denied and expired requests are left to the audit log.</p>
+  {% elif section == "machines" %}
+    <div class="tpb-cols">
+      <div class="tpb-card">
+        <h3>Machine ID bots</h3>
+        {% if bots %}<table class="tpb-table"><thead><tr><th>Bot</th><th>Roles</th><th>Joins by</th><th>Max TTL</th></tr></thead><tbody>
+          {% for b in bots %}<tr><td class="tpb-strong">{{ b.name }}</td><td>{{ b.roles|default:"—" }}</td><td class="{% if b.static %}tpb-tone--bad{% endif %}">{{ b.join|default:"—" }}{% if b.static %} (static secret){% endif %}</td><td>{{ b.ttl|default:"—" }}</td></tr>{% endfor %}
+        </tbody></table>{% else %}<p class="tpb-empty">No bots on the grid for this cluster.</p>{% endif %}
+      </div>
+      <div class="tpb-card">
+        <h3>Agents</h3>
+        {% if agents %}<table class="tpb-table"><thead><tr><th>Agent</th><th>Services</th><th>Version</th><th>Joined by</th></tr></thead><tbody>
+          {% for a in agents %}<tr><td class="tpb-strong">{{ a.name }}</td><td>{{ a.services|default:"—" }}</td><td>{{ a.version|default:"not observed" }}</td><td>{{ a.join|default:"—" }}</td></tr>{% endfor %}
+        </tbody></table>{% else %}<p class="tpb-empty">No agents on the grid for this cluster.</p>{% endif %}
+      </div>
+    </div>
+    <div class="tpb-card">
+      <h3>Join tokens</h3>
+      {% if tokens %}<table class="tpb-table"><thead><tr><th>Token</th><th>Method</th><th>System roles</th><th>Admits</th><th>Used by</th><th>Expires</th></tr></thead><tbody>
+        {% for t in tokens %}<tr><td class="tpb-strong tpb-mono">{{ t.name }}</td><td class="{% if t.static %}tpb-tone--bad{% endif %}">{{ t.method|default:"—" }}{% if t.static %} (static secret){% endif %}</td><td>{{ t.roles|default:"—" }}</td><td>{{ t.admits|default:"—" }}</td><td>{{ t.joiners|default:"—" }}</td><td class="{% if t.expired %}tpb-tone--warn{% endif %}">{{ t.expires|default:"not observed" }}{% if t.expired %} (expired){% endif %}</td></tr>{% endfor %}
+      </tbody></table>{% else %}<p class="tpb-empty">No join tokens on the grid for this cluster.</p>{% endif %}
+    </div>
+  {% elif section == "trust" %}
+    <div class="tpb-cols">
+      <div class="tpb-card">
+        <h3>Certificate authorities</h3>
+        {% if cas %}<table class="tpb-table"><thead><tr><th>CA</th><th>Rotation</th><th>Last rotated</th><th>Key storage</th><th>Key</th></tr></thead><tbody>
+          {% for c in cas %}<tr><td class="tpb-strong">{{ c.type }}</td><td class="tpb-tone--{{ c.phase_tone }}">{{ c.phase }}</td><td>{{ c.rotated|default:"not observed" }}</td><td class="tpb-tone--{{ c.storage_tone }}">{{ c.storage }}</td><td>{{ c.keys|default:"—" }}</td></tr>{% endfor %}
+        </tbody></table>{% else %}<p class="tpb-empty">No certificate authorities on the grid for this cluster.</p>{% endif %}
+      </div>
+      <div class="tpb-card">
+        <h3>Trusted clusters</h3>
+        {% if trusts %}<table class="tpb-table"><thead><tr><th>Peer</th><th>This cluster is</th><th>Enabled</th><th>Tunnel</th><th>Role map</th></tr></thead><tbody>
+          {% for t in trusts %}<tr><td class="tpb-strong">{% if t.peer_id %}<a href="?cluster={{ t.peer_id }}">{{ t.peer }}</a>{% else %}{{ t.peer }}{% endif %}</td><td>{% if t.direction == "root" %}leaf of it{% else %}root of it{% endif %}</td><td>{% if t.enabled is None %}<span class="tpb-no">not observed</span>{% elif t.enabled %}yes{% else %}no{% endif %}</td><td>{{ t.status|default:"not observed" }}</td><td class="tpb-mono">{{ t.role_map|default:"—" }}</td></tr>{% endfor %}
+        </tbody></table>{% else %}<p class="tpb-empty">No trusted-cluster relationship on the grid for this cluster.</p>{% endif %}
+      </div>
+    </div>
+  {% endif %}
+</section>

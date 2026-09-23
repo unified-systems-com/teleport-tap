@@ -1,0 +1,21 @@
+{
+  "slug": "ADMITS_IDENTITY__teleport",
+  "name": "Admits Identity",
+  "description": "A delegated-join token admits an external workload identity named in one of its allow rules: an AWS account or IAM role ARN, a GitHub repository or workflow, a Kubernetes service account, a GitLab project. Target open because the identity lives in whatever plugin models that platform; the rule itself is carried as a property.",
+  "sources": [
+    "teleport__teleport_join_token"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "rule": {
+        "type": "object",
+        "description": "The allow rule (as written in the token's spec.allow) that names this identity."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

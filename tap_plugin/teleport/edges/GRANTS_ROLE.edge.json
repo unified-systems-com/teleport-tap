@@ -1,0 +1,28 @@
+{
+  "slug": "GRANTS_ROLE__teleport",
+  "name": "Grants Role",
+  "description": "An access list grants a role to its members (spec.grants.roles); owners' grants carry `audience: owner`.",
+  "sources": [
+    "teleport__teleport_access_list"
+  ],
+  "targets": [
+    "teleport__teleport_role"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "audience": {
+        "type": "string",
+        "enum": [
+          "member",
+          "owner"
+        ],
+        "description": "Whether members or owners receive the role."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

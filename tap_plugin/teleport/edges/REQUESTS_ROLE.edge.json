@@ -1,0 +1,14 @@
+{
+  "slug": "REQUESTS_ROLE__teleport",
+  "name": "Requests Role",
+  "description": "An access request asks for this role.",
+  "sources": [
+    "teleport__teleport_access_request"
+  ],
+  "targets": [
+    "teleport__teleport_role"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

@@ -1,0 +1,62 @@
+/* teleport-board (req-teleport-panel-board). The git-serious double-tap card system's grammar —
+   a quiet warm ground, white surfaces, hairlines, tabular digits, colour spent on state only —
+   with Teleport's purple as the one accent. Every state also carries a glyph or a word. */
+.tpb { --tpb-ink: #1b1d22; --tpb-muted: #5d6270; --tpb-faint: #9a9fab; --tpb-ground: #f1f0ec; --tpb-surface: #ffffff;
+       --tpb-edge: #d8d6cf; --tpb-rule: #e7e5df; --tpb-link: #3b24a8; --tpb-accent: #512fc9;
+       --tpb-bad: #b42318; --tpb-warn: #a15c00; --tpb-good: #1f7a3a; --tpb-unknown: #8a8f9c;
+       font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; line-height: 1.4;
+       color: var(--tpb-ink); background: var(--tpb-ground); padding: 1rem 1.6rem 1.2rem; }
+.tpb a { color: var(--tpb-link); text-decoration: none; }
+.tpb a:hover, .tpb a:focus { text-decoration: underline; text-underline-offset: 0.12em; }
+.tpb-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 1rem; margin-bottom: 0.8rem; border-top: 3px solid var(--tpb-accent); padding-top: 0.6rem; }
+.tpb-title { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+.tpb-cluster { color: var(--tpb-muted); font-weight: 400; }
+.tpb-design { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--tpb-accent); border: 1px dashed var(--tpb-accent); border-radius: 2px; padding: 0.05rem 0.4rem; }
+.tpb-intro { flex-basis: 100%; margin: 0; color: var(--tpb-muted); font-size: 0.85rem; max-width: 72rem; }
+.tpb-error { color: var(--tpb-bad); }
+.tpb-empty { color: var(--tpb-muted); margin: 0.3rem 0 0.6rem; }
+.tpb-note { color: var(--tpb-muted); font-size: 0.78rem; margin: 0.6rem 0 0; max-width: 72rem; }
+.tpb-pick { margin-left: 0.6rem; font-weight: 600; }
+/* posture tiles */
+.tpb-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.6rem; }
+.tpb-tile { background: var(--tpb-surface); border: 1px solid var(--tpb-edge); border-left: 4px solid var(--tpb-unknown); border-radius: 3px; padding: 0.45rem 0.7rem; display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.tpb-tile-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--tpb-muted); }
+.tpb-tile-value { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpb-tile.tpb-tone--good { border-left-color: var(--tpb-good); }
+.tpb-tile.tpb-tone--bad { border-left-color: var(--tpb-bad); }
+.tpb-tile.tpb-tone--warn { border-left-color: var(--tpb-warn); }
+.tpb-tile.tpb-tone--info { border-left-color: var(--tpb-accent); }
+.tpb-tone--good { color: var(--tpb-good); }
+.tpb-tone--bad { color: var(--tpb-bad); }
+.tpb-tone--warn { color: var(--tpb-warn); }
+.tpb-tone--unknown, .tpb-no { color: var(--tpb-unknown); font-style: italic; }
+.tpb-tile.tpb-tone--good, .tpb-tile.tpb-tone--bad, .tpb-tile.tpb-tone--warn, .tpb-tile.tpb-tone--info, .tpb-tile.tpb-tone--unknown { color: var(--tpb-ink); font-style: normal; }
+.tpb-tile.tpb-tone--good .tpb-tile-value { color: var(--tpb-good); }
+.tpb-tile.tpb-tone--bad .tpb-tile-value { color: var(--tpb-bad); }
+.tpb-tile.tpb-tone--warn .tpb-tile-value { color: var(--tpb-warn); }
+.tpb-tile.tpb-tone--unknown .tpb-tile-value { color: var(--tpb-unknown); font-weight: 400; font-style: italic; }
+/* inventory line */
+.tpb-inventory, .tpb-kinds { display: flex; flex-wrap: wrap; gap: 0.2rem 1.3rem; margin: 0.8rem 0 0.2rem; font-size: 0.85rem; color: var(--tpb-muted); font-variant-numeric: tabular-nums; }
+.tpb-inv b { color: var(--tpb-ink); font-weight: 600; }
+.tpb-inv.tpb-tone--bad b, .tpb-inv.tpb-tone--bad { color: var(--tpb-bad); font-style: normal; }
+.tpb-inv.tpb-tone--warn b, .tpb-inv.tpb-tone--warn { color: var(--tpb-warn); }
+.tpb-inv.tpb-tone--good b { color: var(--tpb-good); }
+/* cards and tables */
+.tpb-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr)); gap: 0.9rem 1.1rem; align-items: start; }
+.tpb-card { background: var(--tpb-surface); border: 1px solid var(--tpb-edge); border-radius: 3px; padding: 0.55rem 0.85rem 0.7rem; margin-top: 0.8rem; min-width: 0; box-shadow: 0 1px 2px rgba(27, 29, 34, 0.06); }
+.tpb-cols > .tpb-card { margin-top: 0; }
+.tpb-card h3 { margin: 0 0 0.4rem; font-size: 0.95rem; font-weight: 600; }
+.tpb-card h3 small { font-weight: 400; color: var(--tpb-muted); margin-left: 0.4rem; }
+.tpb-scroll { overflow-x: auto; background: var(--tpb-surface); border: 1px solid var(--tpb-edge); border-radius: 3px; }
+.tpb-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.tpb-table th { text-align: left; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--tpb-muted); padding: 0.35rem 0.55rem; border-bottom: 1px solid var(--tpb-edge); white-space: nowrap; }
+.tpb-table td { padding: 0.35rem 0.55rem; border-top: 1px solid var(--tpb-rule); vertical-align: top; }
+.tpb-table tbody tr:first-child td { border-top: 0; }
+.tpb-strong { font-weight: 600; }
+.tpb-num { font-variant-numeric: tabular-nums; text-align: right; }
+.tpb-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; overflow-wrap: anywhere; }
+.tpb-dim { color: var(--tpb-muted); }
+.tpb-tag { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--tpb-muted); border: 1px solid var(--tpb-edge); border-radius: 2px; padding: 0 0.3rem; margin-left: 0.3rem; font-weight: 400; }
+.tpb-labels { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0 0 0.5rem; }
+.tpb-label { display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.72rem; background: #f3f0ff; color: #3b24a8; border-radius: 2px; padding: 0.05rem 0.35rem; margin: 0 0.25rem 0.15rem 0; }
+.tpb-label b { font-weight: 600; margin-left: 0.2rem; }

@@ -1,0 +1,14 @@
+{
+  "slug": "DIALS_REVERSE_TUNNEL__teleport",
+  "name": "Dials Reverse Tunnel",
+  "description": "An agent dials a proxy and holds a reverse tunnel open, so the proxy can reach the agent's resources without any inbound port on the agent's network.",
+  "sources": [
+    "teleport__teleport_agent"
+  ],
+  "targets": [
+    "teleport__teleport_proxy_server"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

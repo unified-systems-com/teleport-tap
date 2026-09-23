@@ -1,0 +1,14 @@
+{
+  "slug": "CALLS_AUTH_API__teleport",
+  "name": "Calls Auth API",
+  "description": "A proxy server calls an auth server's gRPC API for every authentication and authorization decision (through the auth load balancer in HA). Declared per pair so a design can show that each proxy reaches the auth pool.",
+  "sources": [
+    "teleport__teleport_proxy_server"
+  ],
+  "targets": [
+    "teleport__teleport_auth_server"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

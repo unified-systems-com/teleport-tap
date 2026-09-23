@@ -1,0 +1,52 @@
+# teleport_ssh_node
+
+## Blurb
+
+A server reachable over SSH through Teleport: a host running the Teleport SSH Service, or an agentless OpenSSH host registered with the cluster.
+
+## Purpose
+
+Protected resources are what the cluster exists to reach; the front page groups them by kind and label because labels are how roles grant access.
+
+## Goals
+
+- List SSH nodes by label.
+- Show which roles can reach them (`GRANTS_RESOURCE_ACCESS`).
+
+## Identity
+
+`NATURAL_KEY = (`cluster_name`, `hostname`)`. A design knows a host by its hostname; Teleport's node resource is named by host UUID, which exists only after the host joins. Revisit to `(cluster_name, host_id)` when observed.
+
+## Boundaries
+
+- Not the machine itself (an EC2 instance): that is reached by `FRONTS_TARGET`.
+
+## Neutrality
+
+Vendor-specific record of a neutral thing (a host).
+
+## Observability
+
+**Not observed.** No collector exists (`req-teleport-collector`, Backlog), so nothing here has been read from a live cluster and nothing below is written from an executed call. What the documentation says: the record is readable with `tctl get` (or the gRPC API) by a Teleport identity whose role allows `read`/`list` on this resource kind; a Machine ID bot with a read-only role is the expected collector credential. Until a collector exists, every node of `teleport__teleport_ssh_node` on a grid is a design node (`dcom: design`) carrying only the fields its designer knew.
+
+## Authoritative Source
+
+- **Source:** Teleport documentation — Resources reference (goteleport.com/docs/reference/resources/), Teleport configuration reference, and the Teleport Terraform provider resource list
+- **Version:** Teleport 18.x documentation and Terraform provider `~> 18.0`
+- **Retrieved:** 2026-09-22
+
+## Prior Art
+
+- Teleport Terraform provider resource list (provider `~> 18.0`, retrieved 2026-09-22) — the curated set of Teleport resources worth managing; this type's counterpart is named in `specs/spec-teleport-v0.md` § Model catalog.
+- BloodHound OpenGraph community library (retrieved 2026-09-22) — no Teleport extension exists; TailscaleHound is the nearest access-broker graph.
+- Cartography intel module list (retrieved 2026-09-22) — no Teleport module.
+
+## Fields
+
+- `hostname` — The host's name as users see it in `tsh ls`. Required.
+- `cluster_name` — The name of the Teleport cluster this record lives in — the same string as that cluster node's `name`. Part of the natural key because Teleport's names are unique only within one cluster (every cluster ships preset roles called `access`, `editor` and `auditor`). The traversable form of the same membership is the `BELONGS_TO_CLUSTER` edge; this column is what the key rests on (a key must be a column the generated search can filter).
+- `host_id` — The node resource name (the host UUID). Blank until observed; the future key.
+- `addr` — The address the node advertises (`host:port`), blank for tunnel-only nodes or when not observed.
+- `sub_kind` — `teleport` for a host running the SSH Service, `openssh` for an agentless OpenSSH host, `openssh-ec2-ice` for EC2 Instance Connect Endpoint access. Blank until observed.
+- `labels` — The resource's labels (static `metadata.labels` plus the latest dynamic command-label values), as a flat string map. Role `*_labels` selectors match against these, which is how access is granted; empty means not observed, not unlabelled.
+- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

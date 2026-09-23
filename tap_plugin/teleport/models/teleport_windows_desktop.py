@@ -1,0 +1,68 @@
+"""Teleport Windows Desktop — A Windows host reachable over Teleport's desktop access (RDP through the proxy with certificate-based smart-card login), registered statically or discovered from Active Directory.
+
+Spec: specs/spec-teleport-v0.md (req-teleport-resources).
+Domain article: domain/teleport_windows_desktop.md.
+"""
+
+from typing import Any, ClassVar
+
+from django.db import models
+
+from tap_grid.models import BaseModel
+
+
+class TeleportWindowsDesktop(BaseModel):
+    """A Windows host reachable over Teleport's desktop access (RDP through the proxy with certificate-based smart-card login), registered statically or discovered from Active Directory."""
+
+    ENTITY_TYPE: ClassVar[str] = "teleport__teleport_windows_desktop"
+    ENTITY_NAME: ClassVar[str] = "Teleport Windows Desktop"
+    ENTITY_DESCRIPTION: ClassVar[str] = (
+        "A Windows host reachable over Teleport's desktop access (RDP through the proxy with certificate-based smart-card login), registered statically or discovered from Active Directory."
+    )
+    ENTITY_ICON: ClassVar[str] = "teleport-windows-desktop"
+    # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
+    # environment default: those belong to the observation, stamped by whoever writes the node.
+    DEFAULT_DIMENSIONS: ClassVar[dict[str, str]] = {"teleport.plane": "resource"}
+    # Desktop names are unique within the Teleport cluster.
+    NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    DEFAULT_DISPLAY: ClassVar[dict[str, Any]] = {
+        "tap_viz": {
+            "shape": "round-rectangle",
+            "colors": {"fill": "#FFFFFF", "border": "#0F766E", "label": "#134E4A"},
+            "label": {"valign": "bottom", "halign": "center", "position": "outside"},
+        }
+    }
+
+    FIELD_CRUD_SCHEMA: ClassVar[dict[str, Any]] = {
+        "name": {"type": "string", "minLength": 1},
+        "cluster_name": {"type": "string", "minLength": 1},
+        "addr": {"type": "string"},
+        "domain": {"type": "string"},
+        "labels": {"type": "object"},
+        "configuration": {"type": "object"},
+    }
+    FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
+        "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
+        "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
+        "addr": {"validation": "jsonschema", "schema": {"type": "string"}},
+        "domain": {"validation": "jsonschema", "schema": {"type": "string"}},
+        "labels": {"validation": "jsonschema", "schema": {"type": "object"}},
+        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
+    }
+    CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
+
+    name = models.CharField(max_length=512, blank=True, default="", db_index=True)
+    cluster_name = models.CharField(max_length=512, blank=True, default="", db_index=True)
+    addr = models.CharField(max_length=512, blank=True, default="")
+    domain = models.CharField(max_length=512, blank=True, default="")
+    labels = models.JSONField(default=dict, blank=True)
+    configuration = models.JSONField(default=dict, blank=True)
+
+    class Meta(BaseModel.Meta):
+        db_table = "teleport__teleport_windows_desktop"
+
+    def get_name(self) -> str:
+        return self.name or ""
+
+    def __str__(self) -> str:
+        return self.get_name()

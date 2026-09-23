@@ -1,0 +1,14 @@
+{
+  "slug": "RAISES_ACCESS_REQUEST__teleport",
+  "name": "Raises Access Request",
+  "description": "A user raised this access request.",
+  "sources": [
+    "teleport__teleport_user"
+  ],
+  "targets": [
+    "teleport__teleport_access_request"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "slug": "RUNS_ON_COMPUTE__teleport",
+  "name": "Runs On Compute",
+  "description": "A Teleport process runs on this compute. The target is left open because Teleport runs anywhere: an EC2 instance or auto-scaling group, an ECS service or task, a Kubernetes workload, a VM. In the highbar design the auth servers run on EC2 and the proxies on an ECS Fargate service.",
+  "sources": [
+    "teleport__teleport_auth_server",
+    "teleport__teleport_proxy_server",
+    "teleport__teleport_agent"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

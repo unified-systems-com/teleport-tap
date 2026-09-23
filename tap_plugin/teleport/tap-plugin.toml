@@ -1,20 +1,70 @@
 manifest_version = "0"
-plugin_version = "0.1.0"
+plugin_version = "0.2.0"
 requires_tap = ">=0.2.1"
 slug = "teleport"
 name = "TAP Teleport"
-description = "Teleport infrastructure access as grid vocabulary: v0 carries one outer node, the Teleport cluster (the access service), so a design can place it before anything is collected."
+description = "Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable /teleport operator page."
 
-# Pure Python, no dependencies, no crypto (spec-fips.md, req-tap-plugin-manifest-v0-fips).
+# No depends_on: every edge that reaches another platform (compute, storage, keys, IdPs, fronted
+# targets, joining workloads) leaves that end open, so the vocabulary names no other plugin's type.
+# Pure Python, no crypto (spec-fips.md, req-tap-plugin-manifest-v0-fips).
 [fips]
 status = "compatible"
 
 [models]
 teleport__teleport_cluster = "tap_plugin.teleport.models.teleport_cluster.TeleportCluster"
+teleport__teleport_auth_server = "tap_plugin.teleport.models.teleport_auth_server.TeleportAuthServer"
+teleport__teleport_proxy_server = "tap_plugin.teleport.models.teleport_proxy_server.TeleportProxyServer"
+teleport__teleport_agent = "tap_plugin.teleport.models.teleport_agent.TeleportAgent"
+teleport__teleport_certificate_authority = "tap_plugin.teleport.models.teleport_certificate_authority.TeleportCertificateAuthority"
+teleport__teleport_role = "tap_plugin.teleport.models.teleport_role.TeleportRole"
+teleport__teleport_user = "tap_plugin.teleport.models.teleport_user.TeleportUser"
+teleport__teleport_sso_connector = "tap_plugin.teleport.models.teleport_sso_connector.TeleportSsoConnector"
+teleport__teleport_bot = "tap_plugin.teleport.models.teleport_bot.TeleportBot"
+teleport__teleport_join_token = "tap_plugin.teleport.models.teleport_join_token.TeleportJoinToken"
+teleport__teleport_access_list = "tap_plugin.teleport.models.teleport_access_list.TeleportAccessList"
+teleport__teleport_access_request = "tap_plugin.teleport.models.teleport_access_request.TeleportAccessRequest"
+teleport__teleport_trusted_device = "tap_plugin.teleport.models.teleport_trusted_device.TeleportTrustedDevice"
+teleport__teleport_ssh_node = "tap_plugin.teleport.models.teleport_ssh_node.TeleportSshNode"
+teleport__teleport_kube_cluster = "tap_plugin.teleport.models.teleport_kube_cluster.TeleportKubeCluster"
+teleport__teleport_database = "tap_plugin.teleport.models.teleport_database.TeleportDatabase"
+teleport__teleport_app = "tap_plugin.teleport.models.teleport_app.TeleportApp"
+teleport__teleport_windows_desktop = "tap_plugin.teleport.models.teleport_windows_desktop.TeleportWindowsDesktop"
+
+[edges]
+BELONGS_TO_CLUSTER__teleport = "edges/BELONGS_TO_CLUSTER.edge.json"
+RUNS_ON_COMPUTE__teleport = "edges/RUNS_ON_COMPUTE.edge.json"
+STORES_CLUSTER_STATE__teleport = "edges/STORES_CLUSTER_STATE.edge.json"
+WRITES_AUDIT_EVENTS__teleport = "edges/WRITES_AUDIT_EVENTS.edge.json"
+UPLOADS_SESSION_RECORDINGS__teleport = "edges/UPLOADS_SESSION_RECORDINGS.edge.json"
+CALLS_AUTH_API__teleport = "edges/CALLS_AUTH_API.edge.json"
+DIALS_REVERSE_TUNNEL__teleport = "edges/DIALS_REVERSE_TUNNEL.edge.json"
+JOINS_WITH_TOKEN__teleport = "edges/JOINS_WITH_TOKEN.edge.json"
+ADMITS_IDENTITY__teleport = "edges/ADMITS_IDENTITY.edge.json"
+SIGNS_WITH_KEY__teleport = "edges/SIGNS_WITH_KEY.edge.json"
+TRUSTS_ROOT_CLUSTER__teleport = "edges/TRUSTS_ROOT_CLUSTER.edge.json"
+SERVES_RESOURCE__teleport = "edges/SERVES_RESOURCE.edge.json"
+FRONTS_TARGET__teleport = "edges/FRONTS_TARGET.edge.json"
+GRANTS_RESOURCE_ACCESS__teleport = "edges/GRANTS_RESOURCE_ACCESS.edge.json"
+HOLDS_ROLE__teleport = "edges/HOLDS_ROLE.edge.json"
+MAPS_TO_ROLE__teleport = "edges/MAPS_TO_ROLE.edge.json"
+DELEGATES_LOGIN__teleport = "edges/DELEGATES_LOGIN.edge.json"
+LOGS_IN_VIA_CONNECTOR__teleport = "edges/LOGS_IN_VIA_CONNECTOR.edge.json"
+GRANTS_ROLE__teleport = "edges/GRANTS_ROLE.edge.json"
+MEMBER_OF_ACCESS_LIST__teleport = "edges/MEMBER_OF_ACCESS_LIST.edge.json"
+PERMITS_ROLE_REQUEST__teleport = "edges/PERMITS_ROLE_REQUEST.edge.json"
+RAISES_ACCESS_REQUEST__teleport = "edges/RAISES_ACCESS_REQUEST.edge.json"
+REQUESTS_ROLE__teleport = "edges/REQUESTS_ROLE.edge.json"
+REQUESTS_RESOURCE__teleport = "edges/REQUESTS_RESOURCE.edge.json"
+REVIEWED_ACCESS_REQUEST__teleport = "edges/REVIEWED_ACCESS_REQUEST.edge.json"
+ENROLLED_DEVICE__teleport = "edges/ENROLLED_DEVICE.edge.json"
+
+[grift]
+page = "grift/page.grift.json"
 
 # In-package boot record (req-boot-bootstrap-records-in-package). Digest is the canonical sha256
 # of the record; regenerate with scripts/boot-record-hash --refresh in a core checkout.
 [[boot.records]]
 name = "ci"
 description = "RESERVED NAME (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in — depends_on closure (empty) + self, offline, credential-free. The consumer flips self to editable."
-sha256 = "c4e282eb034af73f2896f4e0f0dd4437a774c8ab308f0828f6c035346b473c13"
+sha256 = "e493432c00eb3e2013995da21b8caec4ea82dbe2fed02bc8582b02075d4b09b2"

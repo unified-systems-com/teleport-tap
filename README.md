@@ -1,14 +1,19 @@
 # teleport-tap
 
-Teleport infrastructure access as grid vocabulary: v0 carries one outer node, the Teleport cluster (the access service), so a design can place it before anything is collected.
+Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable `/teleport` operator page.
 
 ## What this plugin owns
 
-One type in v0: `teleport__teleport_cluster` — a Teleport cluster: the access service (auth + proxy) that brokers SSH, Kubernetes, database, application and desktop access. A design can place it before any access exists; everything inside it is later vocabulary.
+- **18 node types** (`teleport__*`) across five planes (`teleport.plane`): the cluster and its FedRAMP posture columns; auth servers, proxy servers and agents; certificate authorities; roles, join tokens, access lists and access requests; users, SSO connectors, Machine ID bots and trusted devices; SSH nodes, Kubernetes clusters, databases, applications and Windows desktops.
+- **26 edge types**, including the grant paths (connector → role → resource, role → requestable role, token → joining identity). Every edge that reaches another platform (compute, storage, KMS keys, the IdP, fronted targets) leaves that end open, so the plugin depends on nothing.
+- **`/teleport`** — a deployment graph (layout module `static/teleport/js/projections/teleport-deployment.js`) over seven board sections: posture, roles, identity, resources, requests, machines, trust. `?cluster=<entity_id>` picks the cluster; one cluster on the grid is chosen automatically.
+- A domain article for every type, edge and dimension under `tap_plugin/teleport/domain/`.
+
+Nothing here names a deployment: a specific cluster's design nodes belong in the instance plugin that seeds it.
 
 ## Read first
 
-`specs/spec-teleport-v0.md` — this is a thin v0 that puts the piece on the board; the full spec interview runs when the plugin grows.
+`specs/spec-teleport-v0.md` — the requirements, the corpus (scope, rejected candidates, source register) and the prior-art survey.
 
 ## Stand it up
 

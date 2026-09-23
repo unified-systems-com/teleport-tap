@@ -1,0 +1,11 @@
+{
+  "slug": "DELEGATES_LOGIN__teleport",
+  "name": "Delegates Login",
+  "description": "An SSO connector hands login to an external identity provider. Target open: for an OIDC connector the neutral `identity_core__oidc_issuer`; for SAML the IdP's own node (an Okta org, an Entra tenant); for GitHub the GitHub platform or organization. The connector's `idp_url` is the string the trust was configured with.",
+  "sources": [
+    "teleport__teleport_sso_connector"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "identity"
+  }
+}

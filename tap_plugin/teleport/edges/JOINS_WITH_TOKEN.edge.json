@@ -1,0 +1,16 @@
+{
+  "slug": "JOINS_WITH_TOKEN__teleport",
+  "name": "Joins With Token",
+  "description": "An agent, a separately-run proxy or a Machine ID bot joined (or joins) the cluster by presenting this provision token.",
+  "sources": [
+    "teleport__teleport_agent",
+    "teleport__teleport_proxy_server",
+    "teleport__teleport_bot"
+  ],
+  "targets": [
+    "teleport__teleport_join_token"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

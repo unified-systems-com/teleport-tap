@@ -3,7 +3,7 @@
 #   entry-point key = "teleport"
 [project]
 name = "teleport-tap"
-description = "Teleport infrastructure access as grid vocabulary: v0 carries one outer node, the Teleport cluster (the access service), so a design can place it before anything is collected."
+description = "Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable /teleport operator page."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.14"

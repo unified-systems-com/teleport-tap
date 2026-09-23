@@ -1,0 +1,11 @@
+{
+  "slug": "WRITES_AUDIT_EVENTS__teleport",
+  "name": "Writes Audit Events",
+  "description": "An auth server writes the cluster's audit log. Target open: a DynamoDB audit table, an Athena/S3 audit store, Firestore or a file log. Forward (no `_FROM`): the auth server initiates and the events flow to the store.",
+  "sources": [
+    "teleport__teleport_auth_server"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

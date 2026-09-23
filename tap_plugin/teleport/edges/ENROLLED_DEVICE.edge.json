@@ -1,0 +1,14 @@
+{
+  "slug": "ENROLLED_DEVICE__teleport",
+  "name": "Enrolled Device",
+  "description": "A user enrolled this trusted device (the device's credential is tied to them).",
+  "sources": [
+    "teleport__teleport_user"
+  ],
+  "targets": [
+    "teleport__teleport_trusted_device"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "identity"
+  }
+}
