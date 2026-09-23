@@ -19,6 +19,7 @@ Agents are how resources enter the cluster, and the join is the trust decision a
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not a protected resource: an SSH host an agent runs on is still a `teleport_ssh_node`, served by the agent.
 - Not the Machine ID `tbot` process — that is a `teleport_bot` identity.
 
@@ -49,4 +50,3 @@ Vendor-specific. Boundary has workers and StrongDM has gateways/relays, but the 
 - `host_id` — The host UUID the agent received when it joined. Blank until observed; the future key.
 - `teleport_version` — The Teleport version the agent runs — the one fact auto-update and CVE triage need. Blank until observed.
 - `services` — Which Teleport services this process runs, from the instance inventory. Empty means not observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

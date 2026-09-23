@@ -54,7 +54,6 @@ class TeleportAccessRequest(BaseModel):
         "resolve_reason": {"type": "string"},
         "created_at": {"type": "string"},
         "expires_at": {"type": "string"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
@@ -64,7 +63,6 @@ class TeleportAccessRequest(BaseModel):
         "resolve_reason": {"validation": "jsonschema", "schema": {"type": "string"}},
         "created_at": {"validation": "jsonschema", "schema": {"type": "string"}},
         "expires_at": {"validation": "jsonschema", "schema": {"type": "string"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
 
@@ -75,7 +73,6 @@ class TeleportAccessRequest(BaseModel):
     resolve_reason = models.TextField(blank=True, default="")
     created_at = models.CharField(max_length=512, blank=True, default="")
     expires_at = models.CharField(max_length=512, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_access_request"

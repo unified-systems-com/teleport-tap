@@ -48,14 +48,12 @@ class TeleportTrustedDevice(BaseModel):
         "asset_tag": {"type": "string", "minLength": 1},
         "os_type": {"type": "string", "enum": ["macos", "windows", "linux", ""]},
         "enroll_status": {"type": "string", "enum": ["enrolled", "not_enrolled", ""]},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "asset_tag": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "os_type": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["macos", "windows", "linux", ""]}},
         "enroll_status": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["enrolled", "not_enrolled", ""]}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['asset_tag', 'cluster_name']
 
@@ -63,7 +61,6 @@ class TeleportTrustedDevice(BaseModel):
     asset_tag = models.CharField(max_length=512, blank=True, default="", db_index=True)
     os_type = models.CharField(max_length=64, blank=True, default="")
     enroll_status = models.CharField(max_length=64, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_trusted_device"

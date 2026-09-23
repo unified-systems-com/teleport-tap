@@ -19,6 +19,7 @@ Pending requests are the operator's inbox, and approved-but-unexpired requests a
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not access-request audit events (the grid's history covers state changes).
 - Not access monitoring rules (automatic review) — Backlog.
 
@@ -51,4 +52,3 @@ Vendor-specific; JIT elevation is common (PIM, Boundary) but the request/review/
 - `resolve_reason` — The reviewer's reason for the final decision. Blank until observed.
 - `created_at` — When the request was made (ISO-8601). Blank until observed.
 - `expires_at` — When the request (pending) or the granted access (approved) expires (ISO-8601). Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

@@ -19,6 +19,7 @@ Users are who holds roles. The local-vs-SSO split is itself a control: a local a
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the person in the IdP — the SSO connector's IdP owns that; a user reaches it through `LOGS_IN_VIA_CONNECTOR`.
 - Not bots (`teleport_bot`).
 
@@ -49,4 +50,3 @@ Vendor-specific record; a neutral principal substrate may later link to it the w
 - `user_type` — `local` for a user with a Teleport password, `sso` for a user Teleport created from a connector login. FedRAMP guidance expects none of the first once local auth is off. Blank until observed.
 - `traits` — The user's traits (`logins`, `kubernetes_groups`, `db_users`, IdP attributes) that role templates interpolate. Empty means not observed.
 - `created_at` — When the user record was created (ISO-8601). Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

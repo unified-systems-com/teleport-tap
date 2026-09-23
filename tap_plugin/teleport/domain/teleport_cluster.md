@@ -20,6 +20,7 @@ The outer node a reader recognises as Teleport, and the home of the cluster-wide
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the Auth or Proxy processes — those are `teleport_auth_server` / `teleport_proxy_server`.
 - Not the storage: the DynamoDB tables and S3 bucket are cloud nodes the auth servers reach by edges.
 - Root/leaf trust is the `TRUSTS_ROOT_CLUSTER` edge, not a field.
@@ -56,5 +57,4 @@ Vendor-specific. Other access brokers (HashiCorp Boundary, StrongDM, Tailscale) 
 - `second_factor` — The `cluster_auth_preference.second_factor(s)` setting as Teleport reports it (e.g. `webauthn`, `on`, `otp`). A string rather than an enum because the vocabulary has changed across major versions. Blank until observed.
 - `device_trust_mode` — The `cluster_auth_preference.device_trust.mode`: whether access demands an enrolled trusted device. Blank until observed.
 - `session_recording_mode` — The `session_recording_config.mode`: where sessions are recorded and whether recording is synchronous. Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.
 - `tags` — Free-form tags a design or operator attaches to the cluster node. Not a Teleport concept.

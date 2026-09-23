@@ -51,7 +51,6 @@ class TeleportApp(BaseModel):
         "uri": {"type": "string"},
         "public_addr": {"type": "string"},
         "labels": {"type": "object"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
@@ -59,7 +58,6 @@ class TeleportApp(BaseModel):
         "uri": {"validation": "jsonschema", "schema": {"type": "string"}},
         "public_addr": {"validation": "jsonschema", "schema": {"type": "string"}},
         "labels": {"validation": "jsonschema", "schema": {"type": "object"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name']
 
@@ -68,7 +66,6 @@ class TeleportApp(BaseModel):
     uri = models.CharField(max_length=512, blank=True, default="")
     public_addr = models.CharField(max_length=512, blank=True, default="")
     labels = models.JSONField(default=dict, blank=True)
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_app"

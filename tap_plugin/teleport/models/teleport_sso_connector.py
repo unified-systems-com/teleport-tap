@@ -51,7 +51,6 @@ class TeleportSsoConnector(BaseModel):
         "kind": {"type": "string", "enum": ["saml", "oidc", "github"]},
         "display": {"type": "string"},
         "idp_url": {"type": "string"},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
@@ -59,7 +58,6 @@ class TeleportSsoConnector(BaseModel):
         "kind": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["saml", "oidc", "github"]}},
         "display": {"validation": "jsonschema", "schema": {"type": "string"}},
         "idp_url": {"validation": "jsonschema", "schema": {"type": "string"}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['name', 'cluster_name', 'kind']
 
@@ -68,7 +66,6 @@ class TeleportSsoConnector(BaseModel):
     kind = models.CharField(max_length=64, blank=True, default="")
     display = models.CharField(max_length=512, blank=True, default="")
     idp_url = models.CharField(max_length=512, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_sso_connector"

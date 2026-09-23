@@ -19,6 +19,7 @@ With device trust `required`, access depends on the device as well as the user �
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not an MDM record — Jamf/Intune sync is a separate integration (Backlog).
 
 ## Neutrality
@@ -47,4 +48,3 @@ Vendor-specific record; a neutral device substrate (computing_core) may later li
 - `asset_tag` — The device's asset tag — its serial number. Required; the natural key.
 - `os_type` — The device's operating system. Blank until observed.
 - `enroll_status` — Whether the device holds an enrolled credential. Blank until observed — and blank is not `not_enrolled`.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

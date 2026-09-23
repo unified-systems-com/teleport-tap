@@ -49,7 +49,6 @@ class TeleportCertificateAuthority(BaseModel):
         "rotation_phase": {"type": "string", "enum": ["standby", "init", "update_clients", "update_servers", "rollback", ""]},
         "last_rotated_at": {"type": "string"},
         "key_storage": {"type": "string", "enum": ["software", "aws_kms", "gcp_kms", "pkcs11", ""]},
-        "configuration": {"type": "object"},
     }
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
@@ -57,7 +56,6 @@ class TeleportCertificateAuthority(BaseModel):
         "rotation_phase": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["standby", "init", "update_clients", "update_servers", "rollback", ""]}},
         "last_rotated_at": {"validation": "jsonschema", "schema": {"type": "string"}},
         "key_storage": {"validation": "jsonschema", "schema": {"type": "string", "enum": ["software", "aws_kms", "gcp_kms", "pkcs11", ""]}},
-        "configuration": {"validation": "jsonschema", "schema": {"type": "object"}},
     }
     CREATE_REQUIRED: ClassVar[list[str]] = ['cluster_name', 'ca_type']
 
@@ -66,7 +64,6 @@ class TeleportCertificateAuthority(BaseModel):
     rotation_phase = models.CharField(max_length=64, blank=True, default="")
     last_rotated_at = models.CharField(max_length=512, blank=True, default="")
     key_storage = models.CharField(max_length=64, blank=True, default="")
-    configuration = models.JSONField(default=dict, blank=True)
 
     class Meta(BaseModel.Meta):
         db_table = "teleport__teleport_certificate_authority"

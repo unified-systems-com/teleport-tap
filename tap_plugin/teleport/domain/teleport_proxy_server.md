@@ -19,6 +19,7 @@ The proxy tier is where the internet meets the cluster; in the highbar ruling it
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the load balancer in front of it (a cloud node).
 - Not the cluster's public address — that is `teleport_cluster.proxy_address`; a proxy's `public_addr` is what one process advertises.
 
@@ -49,4 +50,3 @@ Vendor-specific (Teleport's Proxy Service).
 - `host_id` — The host UUID Teleport assigns on first start. Blank until observed; the future key.
 - `teleport_version` — The Teleport version this process runs. Blank until observed.
 - `public_addr` — The `proxy_service.public_addr` this proxy advertises (normally the load balancer's name). Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.

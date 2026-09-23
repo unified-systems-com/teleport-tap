@@ -19,6 +19,7 @@ The connector is where Teleport hands authentication to the organization's IdP, 
 
 ## Boundaries
 
+- No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
 - Not the IdP: the target of `DELEGATES_LOGIN` is the IdP's own node (an OIDC issuer, an Okta org).
 - Not `login_rule` resources (trait transforms) — Backlog.
 
@@ -49,4 +50,3 @@ Vendor-specific resource over neutral protocols. The OIDC half points at the neu
 - `kind` — Which protocol: `saml`, `oidc` or `github`. Required; part of the key.
 - `display` — The label on the login button. Blank until observed.
 - `idp_url` — The identity provider's address as the connector holds it: the OIDC `issuer_url`, the SAML `entity_descriptor_url` (or SSO URL), or the GitHub `endpoint_url`. The IdP itself is reached by `DELEGATES_LOGIN`; this is the string the trust was configured with. Blank until observed.
-- `configuration` — The rest of the resource as Teleport reports it (the `spec` a collector did not lift into a column). Empty means not observed.
