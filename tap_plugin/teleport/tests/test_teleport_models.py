@@ -103,6 +103,7 @@ def test_static_token_name_must_be_a_digest() -> None:
     assert not _create("teleport__teleport_join_token", {**base, "name": "live-secret"}).success
     assert _create("teleport__teleport_join_token", {**base, "name": "sha256:" + "0f" * 32}).success
     assert _create("teleport__teleport_join_token", {"cluster_name": "stg", "join_method": "iam", "name": "aws-agents"}).success
+    assert not _create("teleport__teleport_join_token", {**base, "join_method": "Token", "name": "live-secret"}).success
 
 
 @pytest.mark.django_db

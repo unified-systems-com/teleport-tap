@@ -55,7 +55,7 @@ class TeleportJoinToken(BaseModel):
     FIELD_CRUD_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"type": "string", "minLength": 1},
         "cluster_name": {"type": "string", "minLength": 1},
-        "join_method": {"type": "string", "minLength": 1},
+        "join_method": {"type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9_]*$"},
         "system_roles": {"type": "array", "items": {"type": "string", "enum": ["Node", "Proxy", "Auth", "Kube", "Db", "App", "WindowsDesktop", "Discovery", "Bot", "Instance"]}},
         "bot_name": {"type": "string"},
         "allow_rules": {"type": "array", "items": {"type": "object"}},
@@ -64,7 +64,7 @@ class TeleportJoinToken(BaseModel):
     FIELD_VALIDATION_SCHEMA: ClassVar[dict[str, Any]] = {
         "name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
         "cluster_name": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
-        "join_method": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1}},
+        "join_method": {"validation": "jsonschema", "schema": {"type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9_]*$"}},
         "system_roles": {"validation": "jsonschema", "schema": {"type": "array", "items": {"type": "string", "enum": ["Node", "Proxy", "Auth", "Kube", "Db", "App", "WindowsDesktop", "Discovery", "Bot", "Instance"]}}},
         "bot_name": {"validation": "jsonschema", "schema": {"type": "string"}},
         "allow_rules": {"validation": "jsonschema", "schema": {"type": "array", "items": {"type": "object"}}},

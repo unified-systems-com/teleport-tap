@@ -32,7 +32,7 @@ def edge(src: str, dst: str, edge_type: str, properties: dict[str, Any] | None =
 
 
 def member(type_slug: str, payload: dict[str, Any], cluster_id: str) -> str:
-    eid = node(type_slug, {"cluster_name": CLUSTER, **payload})
+    eid = node(type_slug, {"cluster_name": CLUSTER, **payload}, {"dcom": "design"})
     edge(eid, cluster_id, "BELONGS_TO_CLUSTER__teleport")
     return eid
 

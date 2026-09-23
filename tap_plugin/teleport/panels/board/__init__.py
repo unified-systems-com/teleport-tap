@@ -100,6 +100,10 @@ QUERIES: dict[str, dict[str, str]] = {
     },
 }
 CLUSTERS_QUERY = f"MATCH (c:{T_CLUSTER}) RETURN c"
+#: The cluster's members by their BELONGS_TO_CLUSTER edge — the same membership the graph uses.
+MEMBERS_QUERY = (
+    f"MATCH (n)-[e:BELONGS_TO_CLUSTER__teleport]->(c:{T_CLUSTER}) WHERE c.entity_id = $cluster_id RETURN n, c"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -642,6 +646,63 @@ def _fetch(queries: dict[str, str], cluster_name: str) -> dict[str, dict[str, An
     return {key: execute_gryphon_raw(q, {"cluster": cluster_name}, layer="full") for key, q in queries.items()}
 
 
+@dataclass
+class Scope:
+    """What the board may show for one cluster, and what it refused to."""
+
+    member_ids: set[str]
+    #: Records whose `cluster_name` names this cluster but which have no BELONGS_TO_CLUSTER edge to it.
+    unlinked: list[str] = field(default_factory=list)
+    #: dcom values across the cluster and its members: {"design": n, "observed": m}.
+    provenance: dict[str, int] = field(default_factory=dict)
+
+    @property
+    def provenance_label(self) -> str:
+        design = self.provenance.get("design", 0)
+        other = sum(v for k, v in self.provenance.items() if k != "design")
+        if design and not other:
+            return "design"
+        if design:
+            return f"mixed: {design} design · {other} not design"
+        return ""
+
+
+def membership(members_env: dict[str, Any], cluster: dict[str, Any]) -> Scope:
+    """The member ids (from the edge) and the provenance mix of the cluster plus its members."""
+    ids = {n["entity_id"] for n in nodes_of(members_env) if n["entity_type"] != T_CLUSTER}
+    prov: dict[str, int] = defaultdict(int)
+    for n in [cluster, *[m for m in nodes_of(members_env) if m["entity_id"] in ids]]:
+        prov["design" if n["_dimensions"].get("dcom") == "design" else "other"] += 1
+    return Scope(member_ids=ids, provenance=dict(prov))
+
+
+def scope_envs(envs: dict[str, dict[str, Any]], scope: Scope) -> dict[str, dict[str, Any]]:
+    """Keep only in-cluster records that BELONG to the cluster by edge (cluster and foreign nodes pass
+    through); drop edges that touch a dropped record. A record the name column claims but the edge
+    does not is recorded in ``scope.unlinked`` rather than shown — the board and the graph must agree."""
+    out: dict[str, dict[str, Any]] = {}
+    unlinked: set[str] = set(scope.unlinked)
+    for key, env in envs.items():
+        keep_nodes, dropped = [], set()
+        for node in env.get("nodes", []) or []:
+            etype = str(node.get("entity_type") or "")
+            eid = str(node.get("entity_id") or "")
+            if etype.startswith("teleport__") and etype != T_CLUSTER and eid not in scope.member_ids:
+                dropped.add(eid)
+                unlinked.add(f"{node.get('name') or eid} ({etype.split('__', 1)[1]})")
+                continue
+            keep_nodes.append(node)
+        keep_edges = []
+        for edge in env.get("edges", []) or []:
+            ed = edge.get("data") or edge
+            if str(ed.get("from_entity_id")) in dropped or str(ed.get("to_entity_id")) in dropped:
+                continue
+            keep_edges.append(edge)
+        out[key] = {**env, "nodes": keep_nodes, "edges": keep_edges}
+    scope.unlinked = sorted(unlinked)
+    return out
+
+
 def build_section(section: str, envs: dict[str, dict[str, Any]], cluster: dict[str, Any], now: datetime) -> dict[str, Any]:
     """The template context for one section, from its envelopes. Pure: the tests call it directly."""
     if section == "posture":
@@ -685,6 +746,8 @@ class TeleportBoardPanelType:
             "cluster": None,
             "choice_message": "",
             "clusters": [],
+            "provenance": "",
+            "unlinked": [],
         }
         if section not in SECTIONS:
             base["board_error"] = f"Unknown board section {section!r}."
@@ -703,10 +766,14 @@ class TeleportBoardPanelType:
         if choice.cluster is None:
             return base
         cluster = choice.cluster
-        base["cluster"] = {"name": cluster.get("name") or cluster["_label"], "entity_id": cluster["entity_id"],
-                           "design": cluster["_dimensions"].get("dcom") == "design"}
+        base["cluster"] = {"name": cluster.get("name") or cluster["_label"], "entity_id": cluster["entity_id"]}
         try:
-            envs = _fetch(QUERIES[section], base["cluster"]["name"])
+            scope = membership(
+                execute_gryphon_raw(MEMBERS_QUERY, {"cluster_id": cluster["entity_id"]}, layer="full"), cluster
+            )
+            envs = scope_envs(_fetch(QUERIES[section], base["cluster"]["name"]), scope)
+            base["provenance"] = scope.provenance_label
+            base["unlinked"] = scope.unlinked
             base.update(build_section(section, envs, cluster, datetime.now(UTC)))
         except Exception:  # noqa: BLE001
             logger.exception("[7d32] teleport board: section %s reads failed for panel %s", section, panel.entity_id)

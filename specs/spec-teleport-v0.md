@@ -352,6 +352,8 @@ Status: `Implemented`
 
 **Parameter.** `?cluster=<entity_id>` selects the cluster for every panel; with exactly one cluster on the grid it is chosen without the parameter; with several and none named, the graph draws the clusters alone as a picker (each tile opens `/teleport?cluster=<id>`) and each board section lists them as links. Nothing in the bundle names an instance.
 
+The graph's scene searches are not parameterized by cluster: Gryphon has no parameter-absent predicate (tap#360), so a search that took `$cluster` could not also serve the one-cluster default. They fetch the teleport scene grid-wide and the layout scopes it in the browser; both halves are gated on `grid.read`, so a reader sees nothing the grid would not already show them. Server-side scoping is the change to make when tap#360 lands.
+
 The graph panel pre-bakes twelve scene searches: every cluster; every deployment/trust/resource-plane member with its `BELONGS_TO_CLUSTER` edge; and one search per edge type drawn (`RUNS_ON_COMPUTE`, `STORES_CLUSTER_STATE`, `WRITES_AUDIT_EVENTS`, `UPLOADS_SESSION_RECORDINGS`, `CALLS_AUTH_API`, `DIALS_REVERSE_TUNNEL`, `SIGNS_WITH_KEY`, `SERVES_RESOURCE`, `FRONTS_TARGET`, `TRUSTS_ROOT_CLUSTER`). No search is an unfiltered edge search. Gryphon has no edge-type alternation, so one search per type is the narrowest form.
 
 #### Acceptance Criteria
@@ -398,7 +400,7 @@ Status: `Implemented`
 
 #### Implementation
 
-`panels/board/__init__.py` (`TeleportBoardPanelType`, slug `teleport-board`, view `teleport/panels/board.html`, css `teleport/css/board.css`), registered in `TeleportConfig.ready()`. `config.section` ∈ `posture`, `roles`, `identity`, `resources`, `requests`, `machines`, `trust`; `config.title`, `config.intro` optional. Reads are Gryphon (`execute_gryphon_raw`), each filtered by `$cluster` on `cluster_name`; folds are pure functions. Sections:
+`panels/board/__init__.py` (`TeleportBoardPanelType`, slug `teleport-board`, view `teleport/panels/board.html`, css `teleport/css/board.css`), registered in `TeleportConfig.ready()`. `config.section` ∈ `posture`, `roles`, `identity`, `resources`, `requests`, `machines`, `trust`; `config.title`, `config.intro` optional. Reads are Gryphon (`execute_gryphon_raw`), each narrowed by `$cluster` on `cluster_name`, then **scoped by membership**: only records with a `BELONGS_TO_CLUSTER` edge to the chosen cluster are shown (the same membership the graph uses), a record the name column claims but the edge does not is listed in a red note instead of shown, and the section badge reports provenance over the cluster and its members (`design`, or `mixed: n design · m not design`). Folds are pure functions. Sections:
 
 - **posture** — tiles for FIPS, signature suite, local auth, second factor (only `webauthn` is green; `on` admits OTP and warns), device trust, session recording, edition (each good / bad / other / not observed against the FedRAMP expectation it names), version and proxy address; counts of auth servers, proxies, agents, roles, users (SSO vs local; any local is red), bots, pending requests, protected resources.
 - **roles** — per role: logins, label selectors, resources reached (`GRANTS_RESOURCE_ACCESS`), requestable roles with approvals (`PERMITS_ROLE_REQUEST`), session MFA, max TTL, deny present, holders with how granted (`HOLDS_ROLE.granted_by`), SSO mappings and access lists that grant it.
@@ -415,6 +417,7 @@ Status: `Implemented`
 | req-teleport-panel-board-1 | Cluster Resolution | Implemented | `?cluster=` wins; one cluster is chosen without it; several without it choose none and list them. | `tests/test_teleport_board.py` |
 | req-teleport-panel-board-2 | Three States | Implemented | A blank posture field renders "not observed", never a verdict. | same |
 | req-teleport-panel-board-3 | Every Section Renders | Implemented | Each section's context builds from real Gryphon reads over a seeded design and its template renders. | same |
+| req-teleport-panel-board-5 | Membership Is The Edge | Implemented | A record naming the cluster without a membership edge is not shown, and the board names it. | `test_membership_is_the_edge_not_the_name` |
 | req-teleport-panel-board-4 | Grants Folded | Implemented | Role reach, requestable roles, SSO mappings, list grants, local-user and static-token flags, overdue reviews, live requests and CA custody are computed as specified. | same |
 
 ---

@@ -57,7 +57,7 @@ def test_every_section_renders_against_a_design() -> None:
         assert unpicked["cluster"] is None and unpicked["clusters"], section
         ctx = TeleportBoardPanelType.get_view_context(_panel(section), rf.get("/teleport", {"cluster": ids["cluster"]}))
         assert ctx["board_error"] is None, (section, ctx["board_error"])
-        assert ctx["cluster"]["name"] == "stg" and ctx["cluster"]["design"] is True
+        assert ctx["cluster"]["name"] == "stg" and ctx["provenance"] == "design"
         html = render_to_string(TeleportBoardPanelType.view, ctx)
         assert "tpb--" + section in html
         contexts[section] = ctx
@@ -92,6 +92,20 @@ def test_every_section_renders_against_a_design() -> None:
     cas = {c["type"]: c for c in trust["cas"]}
     assert cas["host"]["storage_tone"] == "good" and cas["db"]["phase"] == NOT_OBSERVED
     assert trust["trusts"][0]["direction"] == "leaf" and trust["trusts"][0]["peer"] == "leaf"
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "search_readonly"])
+def test_membership_is_the_edge_not_the_name() -> None:
+    """A record that names the cluster but has no BELONGS_TO_CLUSTER edge to it is not shown, and the
+    board says so — the board and the graph scope by the same membership."""
+    ids = _design.seed()
+    _design.node("teleport__teleport_user", {"name": "stray", "cluster_name": "stg", "user_type": "local"})
+    ctx = TeleportBoardPanelType.get_view_context(_panel("identity"), RequestFactory().get("/teleport", {"cluster": ids["cluster"]}))
+    assert ctx["local_users"] == ["breakglass"]
+    assert ctx["unlinked"] == ["stray (teleport_user)"]
+    assert ctx["provenance"] == "design"  # provenance counts members only; the stray is not one
+    html = render_to_string(TeleportBoardPanelType.view, ctx)
+    assert "no membership edge" in html
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "search_readonly"])

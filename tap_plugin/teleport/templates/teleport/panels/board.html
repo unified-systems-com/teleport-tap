@@ -6,10 +6,11 @@ pass or a fail. Text carries every state; colour is a second channel.
 <section class="tpb tpb--{{ section }}" aria-label="{{ title }}">
   <header class="tpb-head">
     <h2 class="tpb-title">{{ title }}{% if cluster %} <span class="tpb-cluster">· {{ cluster.name }}</span>{% endif %}</h2>
-    {% if cluster.design %}<span class="tpb-design" title="Every row on this board comes from design nodes (dcom=design): planned, not built or observed.">design</span>{% endif %}
+    {% if provenance == "design" %}<span class="tpb-design" title="The cluster and every member record are design nodes (dcom=design): planned, not built or observed.">design</span>{% elif provenance %}<span class="tpb-design" title="Some records are design nodes (dcom=design), some are not.">{{ provenance }}</span>{% endif %}
     {% if intro %}<p class="tpb-intro">{{ intro }}</p>{% endif %}
   </header>
 
+  {% if unlinked %}<p class="tpb-error" title="The board and the graph show a record only when its BELONGS_TO_CLUSTER edge points at this cluster.">{{ unlinked|length }} record{{ unlinked|length|pluralize }} name{{ unlinked|length|pluralize:"s," }} this cluster but {{ unlinked|length|pluralize:"has,have" }} no membership edge to it, so {{ unlinked|length|pluralize:"it is,they are" }} not shown: {{ unlinked|join:", " }}</p>{% endif %}
   {% if board_error %}
     <p class="tpb-error">{{ board_error }}</p>
   {% elif not cluster %}
