@@ -15,8 +15,9 @@
  *
  * Everything is derived from the scene; the module names no instance. The cluster is the one the
  * page asked for (`?cluster=<entity_id>`, read from the panel inputs) or, when there is exactly one,
- * that one. Nodes that belong to another cluster (their BELONGS_TO_CLUSTER edge says so) leave the
- * scene, as does any outside node left with no edge to what remains. With several clusters and no
+ * that one. A Teleport record stays only when its BELONGS_TO_CLUSTER edge points at that cluster
+ * (fail closed, the same membership the board uses), and any outside node left with no edge to what
+ * remains leaves too. With several clusters and no
  * input (or an input naming no cluster) nothing is guessed: the clusters are drawn alone, as a
  * picker whose tiles open their own page, and a warning says why.
  *
@@ -174,13 +175,15 @@ function _scope(cy, cluster) {
         if (e.source().id() === cluster.id()) peers.add(e.target().id());
         if (e.target().id() === cluster.id()) peers.add(e.source().id());
     });
+    // Fail closed, as the board does: a Teleport record is drawn only when its BELONGS_TO_CLUSTER
+    // edge points at the chosen cluster. One reached only through another edge search, with no
+    // membership edge, is not this cluster's (the board lists such records by name).
     const drop = cy.nodes().filter((n) => {
         if (n.id() === cluster.id() || peers.has(n.id())) return false;
         if (_type(n) === T.cluster) return true;
-        const owner = memberOf[n.id()];
-        return owner !== undefined && owner !== cluster.id();
+        if (!_type(n).startsWith("teleport__")) return false;
+        return memberOf[n.id()] !== cluster.id();
     });
-    // A member of this cluster whose membership edge is missing stays: it is reported, not hidden.
     cy.remove(drop);
     // Outside nodes (not Teleport types) survive only while attached to something that stayed.
     let changed = true;
