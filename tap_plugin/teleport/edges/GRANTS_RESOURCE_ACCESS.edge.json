@@ -1,0 +1,39 @@
+{
+  "slug": "GRANTS_RESOURCE_ACCESS__teleport",
+  "name": "Grants Resource Access",
+  "description": "A role's allow rules reach this protected resource: its `*_labels` selectors match the resource's labels and no deny rule of the same role excludes it. Derived, not declared by Teleport; the property says how, so a view can tell label-matched from wildcard access.",
+  "sources": [
+    "teleport__teleport_role"
+  ],
+  "targets": [
+    "teleport__teleport_ssh_node",
+    "teleport__teleport_kube_cluster",
+    "teleport__teleport_database",
+    "teleport__teleport_app",
+    "teleport__teleport_windows_desktop"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "principals": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "What the grant lets its holder be on the resource: SSH logins, Kubernetes groups, database users, Windows logins. Empty when the role grants the resource but names no principal."
+      },
+      "match": {
+        "type": "string",
+        "enum": [
+          "labels",
+          "wildcard"
+        ],
+        "description": "`labels` when a specific selector matched; `wildcard` when the selector was `'*': '*'`."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

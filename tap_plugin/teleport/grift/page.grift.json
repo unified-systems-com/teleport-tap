@@ -1,0 +1,972 @@
+{
+  "metadata": {
+    "grift_version": "0"
+  },
+  "_reserved": {},
+  "batches": [
+    {
+      "batch_entity": {
+        "entity_id": "01a0cc73-05a6-7345-afab-4db8710fe78f",
+        "entity_type": "batch",
+        "name": "teleport page v0.1.0",
+        "dimensions": {}
+      },
+      "batch_node": {
+        "source": "tap_plugin.teleport.grift.page",
+        "name": "teleport page v0.1.0",
+        "description": "The /teleport operator page (req-teleport-page): the deployment graph panel with its projection, elevation, layout (teleport-deployment.js) and twelve scene searches — one per node set and one per edge type drawn — and seven teleport-board panels (posture, roles, identity, resources, requests, machines, trust). Reusable: nothing here names an instance; the page reads ?cluster=<entity_id> or uses the single cluster on the grid. References no entity outside this file."
+      },
+      "nodes": [
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "entity_type": "page",
+            "name": "Teleport",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Teleport",
+            "slug": "/teleport",
+            "nav_weight": 120,
+            "description": "The operator's front page for one Teleport cluster in a FedRAMP 20x environment: the deployment picture on top (control plane, storage, keys, agents and what they protect), then the cluster's posture, roles and grants, sign-in, protected resources, access requests, machine identities and trust. ?cluster=<entity_id> picks the cluster; with one cluster on the grid it is chosen. Design nodes (dcom=design) render like observed ones and the board marks them.",
+            "layout": {
+              "full_bleed": true,
+              "columns": {
+                "col-1": {
+                  "width": "1fr",
+                  "rows": {
+                    "row-1": {
+                      "panel-id": "deployment",
+                      "height": "75vh"
+                    },
+                    "row-2": {
+                      "panel-id": "posture",
+                      "height": "auto"
+                    },
+                    "row-3": {
+                      "panel-id": "roles",
+                      "height": "auto"
+                    },
+                    "row-4": {
+                      "panel-id": "identity",
+                      "height": "auto"
+                    },
+                    "row-5": {
+                      "panel-id": "resources",
+                      "height": "auto"
+                    },
+                    "row-6": {
+                      "panel-id": "requests",
+                      "height": "auto"
+                    },
+                    "row-7": {
+                      "panel-id": "machines",
+                      "height": "auto"
+                    },
+                    "row-8": {
+                      "panel-id": "trust",
+                      "height": "auto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "entity_type": "panel",
+            "name": "Teleport deployment",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Teleport deployment",
+            "slug": "teleport-deployment",
+            "description": "One cluster's deployment as a placed picture (teleport-deployment.js): proxies and auth servers inside the cluster box with the certificate authorities, what each runs on to the left, the keys the CAs sign with to the right, the state, audit and recording stores beneath, then each agent with the resources it serves and the targets those front. Scene searches name every edge type they draw.",
+            "view": "tap_viz/panels/graph_panel.html",
+            "config": {
+              "height": "100%",
+              "hide_header": true,
+              "nav_rules": [
+                {
+                  "entity_type": "teleport__teleport_cluster",
+                  "url_template": "/teleport?cluster={entity_id}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dbb31fff7c0",
+            "entity_type": "projection",
+            "name": "teleport deployment projection",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport deployment projection",
+            "description": "Icon-badge chrome (each node's type icon at its upper-left), one elevation running the teleport deployment layout; a placed picture (lock_nodes) opened fitted.",
+            "definition": {
+              "node_style": {
+                "mode": "icon-badge"
+              },
+              "elevations": [
+                "01a0cc73-05a6-7345-afab-4dbc967bc5a2"
+              ],
+              "default_elevation_id": "01a0cc73-05a6-7345-afab-4dbc967bc5a2",
+              "min_zoom": "fit",
+              "lock_nodes": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dbc967bc5a2",
+            "entity_type": "elevation",
+            "name": "teleport deployment elevation",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport deployment elevation",
+            "description": "One Teleport cluster's deployment at one elevation.",
+            "definition": {
+              "zoom": 1.0,
+              "description": "One Teleport cluster's deployment at one elevation.",
+              "layouts": [
+                "01a0cc73-05a6-7345-afab-4dbd242c2e56"
+              ],
+              "double_tap_targets": []
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dbd242c2e56",
+            "entity_type": "layout",
+            "name": "teleport deployment layout",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport deployment layout",
+            "description": "Scopes the scene to one cluster (the ?cluster= input, else the only one), nests proxies, auth servers and CAs in the cluster box by their BELONGS_TO_CLUSTER edges, then places compute, keys, storage, agents, resources and targets in bands relative to what they attach to. Names no instance; a node no band accounts for is drawn under the picture and reported.",
+            "definition": {
+              "js_file": "tap_plugin/teleport/static/teleport/js/projections/teleport-deployment.js",
+              "arrangements": []
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dbed4b8949c",
+            "entity_type": "search",
+            "name": "teleport — clusters",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — clusters",
+            "description": "Every Teleport cluster on the grid, so a cluster with nothing attached is still drawn and a ?cluster= choice can be made. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (c:teleport__teleport_cluster)",
+                "RETURN c"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dbf66444ae7",
+            "entity_type": "search",
+            "name": "teleport — members",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — members",
+            "description": "Every deployment-, trust- and resource-plane record with its BELONGS_TO_CLUSTER edge and cluster. Identity- and policy-plane records (users, roles, tokens …) are left to the board below the picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (n)-[:BELONGS_TO_CLUSTER__teleport]->(c:teleport__teleport_cluster)",
+                "WHERE n.dimensions[\"teleport.plane\"] IN [\"deployment\", \"trust\", \"resource\"]",
+                "RETURN n, c"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc01b539c38",
+            "entity_type": "search",
+            "name": "teleport — runs-on-compute",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — runs-on-compute",
+            "description": "Both ends of every RUNS_ON_COMPUTE__teleport edge — what each Teleport process runs on (EC2 instance, ECS service, …) — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:RUNS_ON_COMPUTE__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc1a7f4604b",
+            "entity_type": "search",
+            "name": "teleport — stores-cluster-state",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — stores-cluster-state",
+            "description": "Both ends of every STORES_CLUSTER_STATE__teleport edge — the cluster-state backend each auth server uses — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:STORES_CLUSTER_STATE__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc2ff18c858",
+            "entity_type": "search",
+            "name": "teleport — writes-audit-events",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — writes-audit-events",
+            "description": "Both ends of every WRITES_AUDIT_EVENTS__teleport edge — the audit store each auth server writes — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:WRITES_AUDIT_EVENTS__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc3bf110e2f",
+            "entity_type": "search",
+            "name": "teleport — uploads-session-recordings",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — uploads-session-recordings",
+            "description": "Both ends of every UPLOADS_SESSION_RECORDINGS__teleport edge — the session-recording store each auth server uploads to — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:UPLOADS_SESSION_RECORDINGS__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc4b3885912",
+            "entity_type": "search",
+            "name": "teleport — calls-auth-api",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — calls-auth-api",
+            "description": "Both ends of every CALLS_AUTH_API__teleport edge — which auth servers each proxy calls — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:CALLS_AUTH_API__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc55282d9ba",
+            "entity_type": "search",
+            "name": "teleport — dials-reverse-tunnel",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — dials-reverse-tunnel",
+            "description": "Both ends of every DIALS_REVERSE_TUNNEL__teleport edge — which proxies each agent tunnels to — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:DIALS_REVERSE_TUNNEL__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc679308246",
+            "entity_type": "search",
+            "name": "teleport — signs-with-key",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — signs-with-key",
+            "description": "Both ends of every SIGNS_WITH_KEY__teleport edge — the KMS/HSM key each certificate authority signs with — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:SIGNS_WITH_KEY__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc758c963a4",
+            "entity_type": "search",
+            "name": "teleport — serves-resource",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — serves-resource",
+            "description": "Both ends of every SERVES_RESOURCE__teleport edge — which resources each agent serves — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:SERVES_RESOURCE__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc8aec12934",
+            "entity_type": "search",
+            "name": "teleport — fronts-target",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — fronts-target",
+            "description": "Both ends of every FRONTS_TARGET__teleport edge — the real target (EC2, EKS, RDS …) each protected resource fronts — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:FRONTS_TARGET__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dc9095c23e1",
+            "entity_type": "search",
+            "name": "teleport — trusts-root-cluster",
+            "dimensions": {}
+          },
+          "node": {
+            "name": "teleport — trusts-root-cluster",
+            "description": "Both ends of every TRUSTS_ROOT_CLUSTER__teleport edge — root/leaf trust between clusters — with the edge (a bare-variable RETURN carries it). Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "search_type": "gryphon",
+            "root": "node",
+            "definition": {
+              "query": [
+                "MATCH (a)-[:TRUSTS_ROOT_CLUSTER__teleport]->(b)",
+                "RETURN a, b"
+              ]
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dcaa4c6b233",
+            "entity_type": "panel",
+            "name": "Cluster posture",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Cluster posture",
+            "slug": "teleport-board-posture",
+            "description": "The cluster's FedRAMP 20x-relevant settings — FIPS build, signature suite, local auth, second factor, device trust, session recording — each marked against the expectation it serves, then what the cluster holds. Grey means not observed: the grid has no value, which is neither a pass nor a fail.",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "posture",
+              "title": "Cluster posture",
+              "intro": "The cluster's FedRAMP 20x-relevant settings — FIPS build, signature suite, local auth, second factor, device trust, session recording — each marked against the expectation it serves, then what the cluster holds. Grey means not observed: the grid has no value, which is neither a pass nor a fail.",
+              "hide_header": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dcb22617bcf",
+            "entity_type": "panel",
+            "name": "Roles and what they grant",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Roles and what they grant",
+            "slug": "teleport-board-roles",
+            "description": "Every role: the logins and label selectors it allows, the protected resources those selectors reach, the roles its holders may request, its session options, who holds it and how they got it (SSO mapping, access list, static).",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "roles",
+              "title": "Roles and what they grant",
+              "intro": "Every role: the logins and label selectors it allows, the protected resources those selectors reach, the roles its holders may request, its session options, who holds it and how they got it (SSO mapping, access list, static).",
+              "hide_header": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dcc3090a46a",
+            "entity_type": "panel",
+            "name": "Who signs in",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Who signs in",
+            "slug": "teleport-board-identity",
+            "description": "SSO connectors and the identity provider each trusts; users split local vs SSO (a local account bypasses the IdP); trusted devices; access lists with their periodic review dates — an overdue review is red.",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "identity",
+              "title": "Who signs in",
+              "intro": "SSO connectors and the identity provider each trusts; users split local vs SSO (a local account bypasses the IdP); trusted devices; access lists with their periodic review dates — an overdue review is red.",
+              "hide_header": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dcdc5329d4e",
+            "entity_type": "panel",
+            "name": "Protected resources",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Protected resources",
+            "slug": "teleport-board-resources",
+            "description": "SSH nodes, Kubernetes clusters, databases, applications and Windows desktops by kind and label, with the agent that serves each and the roles that reach it.",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "resources",
+              "title": "Protected resources",
+              "intro": "SSH nodes, Kubernetes clusters, databases, applications and Windows desktops by kind and label, with the agent that serves each and the roles that reach it.",
+              "hide_header": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dce62edc490",
+            "entity_type": "panel",
+            "name": "Access requests",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Access requests",
+            "slug": "teleport-board-requests",
+            "description": "Pending just-in-time requests (the operator's inbox) and approved requests whose access is still live, with requester, what is asked for, reason and reviews.",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "requests",
+              "title": "Access requests",
+              "intro": "Pending just-in-time requests (the operator's inbox) and approved requests whose access is still live, with requester, what is asked for, reason and reviews.",
+              "hide_header": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dcf61281859",
+            "entity_type": "panel",
+            "name": "Machines: bots, agents and join tokens",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Machines: bots, agents and join tokens",
+            "slug": "teleport-board-machines",
+            "description": "Machine ID bots with their roles and join method, agents with their services and version, and every join token — a static-secret token is a standing credential and is marked red.",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "machines",
+              "title": "Machines: bots, agents and join tokens",
+              "intro": "Machine ID bots with their roles and join method, agents with their services and version, and every join token — a static-secret token is a standing credential and is marked red.",
+              "hide_header": true
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd09abe947e",
+            "entity_type": "panel",
+            "name": "Trust: certificate authorities and trusted clusters",
+            "dimensions": {
+              "tap.graph": "web"
+            }
+          },
+          "node": {
+            "name": "Trust: certificate authorities and trusted clusters",
+            "slug": "teleport-board-trust",
+            "description": "Each CA's rotation phase, last rotation and where its private key lives (KMS/HSM vs software), and every root/leaf trust with its role map.",
+            "view": "teleport/panels/board.html",
+            "editor_view": "",
+            "config": {
+              "section": "trust",
+              "title": "Trust: certificate authorities and trusted clusters",
+              "intro": "Each CA's rotation phase, last rotation and where its private key lives (KMS/HSM vs software), and every root/leaf trust with its role map.",
+              "hide_header": true
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd1ddeb1aaf",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL deployment",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "deployment"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd206d77486",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL posture",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dcaa4c6b233",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "posture"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd33938b2d6",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL roles",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dcb22617bcf",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "roles"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd43a8745d0",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL identity",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dcc3090a46a",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "identity"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd5b78c50d0",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL resources",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dcdc5329d4e",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "resources"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd6c1163f06",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL requests",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dce62edc490",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "requests"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd7e21f7b55",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL machines",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dcf61281859",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "machines"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd8088a4771",
+            "entity_type": "edge",
+            "name": "teleport page USES_PANEL trust",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4db9ec5b25b4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dd09abe947e",
+            "edge_type": "USES_PANEL",
+            "properties": {
+              "hotlink": {
+                "model": "page",
+                "spec": "page-panels",
+                "value": "trust"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dd910ccaade",
+            "entity_type": "edge",
+            "name": "deployment panel USES_PROJECTION teleport deployment projection",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dbb31fff7c0",
+            "edge_type": "USES_PROJECTION",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4ddaa5e045b6",
+            "entity_type": "edge",
+            "name": "teleport deployment projection USES_ELEVATION elevation",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dbb31fff7c0",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dbc967bc5a2",
+            "edge_type": "USES_ELEVATION",
+            "properties": {
+              "hotlink": {
+                "model": "projection",
+                "spec": "projection-elevations",
+                "value": "01a0cc73-05a6-7345-afab-4dbc967bc5a2"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4ddbef103947",
+            "entity_type": "edge",
+            "name": "teleport deployment projection USES_DEFAULT_ELEVATION elevation",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dbb31fff7c0",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dbc967bc5a2",
+            "edge_type": "USES_DEFAULT_ELEVATION",
+            "properties": {
+              "hotlink": {
+                "model": "projection",
+                "spec": "projection-default-elevation",
+                "value": "01a0cc73-05a6-7345-afab-4dbc967bc5a2"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4ddcbc2d4db9",
+            "entity_type": "edge",
+            "name": "teleport deployment elevation USES_LAYOUT layout",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dbc967bc5a2",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dbd242c2e56",
+            "edge_type": "USES_LAYOUT",
+            "properties": {
+              "hotlink": {
+                "model": "elevation",
+                "spec": "elevation-layouts",
+                "value": "01a0cc73-05a6-7345-afab-4dbd242c2e56"
+              }
+            }
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4dddd686dd03",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH clusters",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dbed4b8949c",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4ddee541a4d7",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH members",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dbf66444ae7",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4ddfea35c1c4",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH runs-on-compute",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc01b539c38",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de0e4a0a2ce",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH stores-cluster-state",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc1a7f4604b",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de1f53a59d8",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH writes-audit-events",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc2ff18c858",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de26fff8688",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH uploads-session-recordings",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc3bf110e2f",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de3c442b5fc",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH calls-auth-api",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc4b3885912",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de421878026",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH dials-reverse-tunnel",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc55282d9ba",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de521d77f95",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH signs-with-key",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc679308246",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de62e99e90b",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH serves-resource",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc758c963a4",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de75da6637c",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH fronts-target",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc8aec12934",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        },
+        {
+          "entity": {
+            "entity_id": "01a0cc73-05a6-7345-afab-4de891162b07",
+            "entity_type": "edge",
+            "name": "deployment panel USES_SEARCH trusts-root-cluster",
+            "dimensions": {}
+          },
+          "edge": {
+            "from_entity_id": "01a0cc73-05a6-7345-afab-4dba620fe9e4",
+            "to_entity_id": "01a0cc73-05a6-7345-afab-4dc9095c23e1",
+            "edge_type": "USES_SEARCH",
+            "properties": {}
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "slug": "FRONTS_TARGET__teleport",
+  "name": "Fronts Target",
+  "description": "A Teleport protected resource stands in front of the real target that sessions reach: an EC2 instance, an EKS cluster, an RDS instance, a load balancer or a cloud console. Target open because the target lives in whichever plugin models that infrastructure.",
+  "sources": [
+    "teleport__teleport_ssh_node",
+    "teleport__teleport_kube_cluster",
+    "teleport__teleport_database",
+    "teleport__teleport_app",
+    "teleport__teleport_windows_desktop"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "resource"
+  }
+}

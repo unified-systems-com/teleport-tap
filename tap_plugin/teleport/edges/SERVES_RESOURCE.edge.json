@@ -1,0 +1,18 @@
+{
+  "slug": "SERVES_RESOURCE__teleport",
+  "name": "Serves Resource",
+  "description": "An agent's SSH, Kubernetes, Database, Application or Windows Desktop service serves this protected resource: it heartbeats the resource into the cluster and carries its sessions.",
+  "sources": [
+    "teleport__teleport_agent"
+  ],
+  "targets": [
+    "teleport__teleport_ssh_node",
+    "teleport__teleport_kube_cluster",
+    "teleport__teleport_database",
+    "teleport__teleport_app",
+    "teleport__teleport_windows_desktop"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "resource"
+  }
+}

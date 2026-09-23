@@ -1,0 +1,30 @@
+{
+  "slug": "BELONGS_TO_CLUSTER__teleport",
+  "name": "Belongs To Cluster",
+  "description": "A Teleport record or process belongs to one cluster: it is stored in (or heartbeats into) that cluster's backend and is governed by its CAs. The traversable form of the `cluster_name` column every in-cluster type carries for its natural key — the same pairing as github_core's `full_name` column beside its `OWNS_REPO` edge. One relationship over every in-cluster type, like aws_core's account membership: the target is always the cluster and the meaning never varies by source.",
+  "sources": [
+    "teleport__teleport_auth_server",
+    "teleport__teleport_proxy_server",
+    "teleport__teleport_agent",
+    "teleport__teleport_certificate_authority",
+    "teleport__teleport_role",
+    "teleport__teleport_user",
+    "teleport__teleport_sso_connector",
+    "teleport__teleport_bot",
+    "teleport__teleport_join_token",
+    "teleport__teleport_access_list",
+    "teleport__teleport_access_request",
+    "teleport__teleport_trusted_device",
+    "teleport__teleport_ssh_node",
+    "teleport__teleport_kube_cluster",
+    "teleport__teleport_database",
+    "teleport__teleport_app",
+    "teleport__teleport_windows_desktop"
+  ],
+  "targets": [
+    "teleport__teleport_cluster"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

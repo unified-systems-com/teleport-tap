@@ -1,0 +1,35 @@
+{
+  "slug": "TRUSTS_ROOT_CLUSTER__teleport",
+  "name": "Trusts Root Cluster",
+  "description": "A leaf cluster trusts a root cluster (Teleport's trusted_cluster resource on the leaf; the root sees a remote_cluster). Users of the root reach the leaf's resources with leaf roles chosen by the role map.",
+  "sources": [
+    "teleport__teleport_cluster"
+  ],
+  "targets": [
+    "teleport__teleport_cluster"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "role_map": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        },
+        "description": "The trusted_cluster spec.role_map: root roles (remote) mapped to leaf roles (local)."
+      },
+      "enabled": {
+        "type": "boolean",
+        "description": "Whether the trust is enabled on the leaf."
+      },
+      "connection_status": {
+        "type": "string",
+        "description": "The root's view of the leaf's tunnel (`online`, `offline`); absent when not observed."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "trust"
+  }
+}

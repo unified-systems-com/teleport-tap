@@ -1,0 +1,28 @@
+{
+  "slug": "MAPS_TO_ROLE__teleport",
+  "name": "Maps To Role",
+  "description": "An SSO connector maps an IdP attribute (SAML attribute, OIDC claim, GitHub org/team) value to a Teleport role at login.",
+  "sources": [
+    "teleport__teleport_sso_connector"
+  ],
+  "targets": [
+    "teleport__teleport_role"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "attribute": {
+        "type": "string",
+        "description": "The IdP attribute, claim or `org/team` the mapping reads."
+      },
+      "value": {
+        "type": "string",
+        "description": "The value (or glob/regex) that must match."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

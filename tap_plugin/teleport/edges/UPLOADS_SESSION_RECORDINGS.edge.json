@@ -1,0 +1,11 @@
+{
+  "slug": "UPLOADS_SESSION_RECORDINGS__teleport",
+  "name": "Uploads Session Recordings",
+  "description": "An auth server uploads completed session recordings to durable storage (agents and proxies stream through it). Target open: an S3 bucket, GCS, Azure Blob or a file directory.",
+  "sources": [
+    "teleport__teleport_auth_server"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "slug": "LOGS_IN_VIA_CONNECTOR__teleport",
+  "name": "Logs In Via Connector",
+  "description": "An SSO user was created by, and logs in through, this connector.",
+  "sources": [
+    "teleport__teleport_user"
+  ],
+  "targets": [
+    "teleport__teleport_sso_connector"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "identity"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "slug": "STORES_CLUSTER_STATE__teleport",
+  "name": "Stores Cluster State",
+  "description": "An auth server reads and writes the cluster's state backend (roles, users, tokens, CAs, heartbeats). Target open: Teleport supports DynamoDB, etcd, Firestore, PostgreSQL and file backends; in an AWS HA deployment it is a DynamoDB table.",
+  "sources": [
+    "teleport__teleport_auth_server"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "deployment"
+  }
+}

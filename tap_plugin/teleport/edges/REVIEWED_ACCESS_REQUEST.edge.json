@@ -1,0 +1,32 @@
+{
+  "slug": "REVIEWED_ACCESS_REQUEST__teleport",
+  "name": "Reviewed Access Request",
+  "description": "A user reviewed an access request.",
+  "sources": [
+    "teleport__teleport_user"
+  ],
+  "targets": [
+    "teleport__teleport_access_request"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "proposal": {
+        "type": "string",
+        "enum": [
+          "approve",
+          "deny"
+        ],
+        "description": "The reviewer's decision."
+      },
+      "reviewed_at": {
+        "type": "string",
+        "description": "When the review was submitted (ISO-8601)."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "slug": "REQUESTS_RESOURCE__teleport",
+  "name": "Requests Resource",
+  "description": "A resource access request asks for this specific protected resource.",
+  "sources": [
+    "teleport__teleport_access_request"
+  ],
+  "targets": [
+    "teleport__teleport_ssh_node",
+    "teleport__teleport_kube_cluster",
+    "teleport__teleport_database",
+    "teleport__teleport_app",
+    "teleport__teleport_windows_desktop"
+  ],
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

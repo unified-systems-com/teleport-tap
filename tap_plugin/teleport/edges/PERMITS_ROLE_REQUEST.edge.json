@@ -1,0 +1,25 @@
+{
+  "slug": "PERMITS_ROLE_REQUEST__teleport",
+  "name": "Permits Role Request",
+  "description": "A role lets its holders request another role (`allow.request.roles`) — the just-in-time path to elevated access.",
+  "sources": [
+    "teleport__teleport_role"
+  ],
+  "targets": [
+    "teleport__teleport_role"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "approvals_required": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Approvals the request needs (the role's request thresholds); absent when not observed."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "MEMBER_OF_ACCESS_LIST__teleport",
+  "name": "Member Of Access List",
+  "description": "A user (or a nested access list) is a member or an owner of an access list.",
+  "sources": [
+    "teleport__teleport_user",
+    "teleport__teleport_access_list"
+  ],
+  "targets": [
+    "teleport__teleport_access_list"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "membership": {
+        "type": "string",
+        "enum": [
+          "member",
+          "owner"
+        ],
+        "description": "Owner (reviews and manages) or member (receives grants)."
+      },
+      "expires_at": {
+        "type": "string",
+        "description": "When the membership expires (ISO-8601); absent when it does not or when not observed."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "policy"
+  }
+}

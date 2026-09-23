@@ -1,0 +1,25 @@
+{
+  "slug": "SIGNS_WITH_KEY__teleport",
+  "name": "Signs With Key",
+  "description": "A certificate authority signs with a private key held outside the backend: an AWS KMS key, a GCP KMS key or an HSM object. Target open for those three stores. Absent when the key is `software` (held in the backend) — read `key_storage` on the CA to tell absent-because-software from not observed.",
+  "sources": [
+    "teleport__teleport_certificate_authority"
+  ],
+  "property_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "key_state": {
+        "type": "string",
+        "enum": [
+          "active",
+          "additional_trusted"
+        ],
+        "description": "`active` for the key that signs now; `additional_trusted` for a key kept trusted during rotation."
+      }
+    }
+  },
+  "default_dimensions": {
+    "teleport.plane": "trust"
+  }
+}
