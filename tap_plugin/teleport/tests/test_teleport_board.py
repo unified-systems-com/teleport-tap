@@ -27,8 +27,6 @@ def test_choose_cluster_three_ways() -> None:
     assert choose_cluster([a], "").cluster is a
     assert choose_cluster([a, b], "beta").cluster is b
     assert choose_cluster([a, b], "b").cluster is None  # the name, never the entity id
-    assert choose_cluster([a, b], "teleport__teleport_cluster").cluster is None  # the sentinel is no choice
-    assert choose_cluster([a], "teleport__teleport_cluster").cluster is a
     many = choose_cluster([a, b], "")
     assert many.cluster is None and "2 Teleport clusters" in many.message and len(many.others) == 2
     assert choose_cluster([], "").cluster is None

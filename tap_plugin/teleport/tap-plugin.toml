@@ -1,6 +1,6 @@
 manifest_version = "0"
 plugin_version = "0.2.0"
-requires_tap = ">=0.2.1"
+requires_tap = ">=0.2.2"
 slug = "teleport"
 name = "TAP Teleport"
 description = "Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable /teleport operator page."
