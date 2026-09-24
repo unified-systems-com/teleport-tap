@@ -6,8 +6,7 @@ A panel instance names its ``section`` in ``config``; every section reads the sa
 
 1. Resolve the cluster: ``?cluster=<cluster name>`` (``teleport__teleport_cluster.name``, its natural
    key, matched exactly) when the page was given one, otherwise the single cluster on the grid. With
-   several clusters and no parameter (or the every-cluster sentinel the page's searches default to)
-   the board says so and picks none — picking one silently would present one cluster's posture as
+   several clusters and no parameter the board says so and picks none — picking one silently would present one cluster's posture as
    "the" cluster's.
 2. Run the section's Gryphon reads, each filtered to that cluster by ``cluster_name`` (every
    in-cluster type carries it as part of its natural key). A read that joins two Teleport records
@@ -194,11 +193,8 @@ class ClusterChoice:
 
 def choose_cluster(clusters: list[dict[str, Any]], requested: str) -> ClusterChoice:
     """``?cluster=<cluster name>`` wins, matched exactly; otherwise the only cluster; otherwise none,
-    and say why. The every-cluster sentinel (the type slug the page's searches default to) is no
-    choice at all, so it reads as absent."""
+    and say why."""
     clusters = sorted(clusters, key=lambda c: str(c.get("name") or ""))
-    if requested == T_CLUSTER:
-        requested = ""
     if requested:
         for c in clusters:
             if c.get("name") == requested:

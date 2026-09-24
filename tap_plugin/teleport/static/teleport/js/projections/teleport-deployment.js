@@ -140,8 +140,7 @@ export async function execute(context) {
 
 function _chooseCluster(cy, requested, warn) {
     const clusters = cy.nodes(`[entity_type = "${T.cluster}"]`).sort(_byLabel);
-    // The every-cluster sentinel the scene searches default to is no choice at all.
-    const name = requested === T.cluster ? "" : String(requested || "");
+    const name = String(requested || "");
     if (name) {
         const hit = clusters.filter((n) => String(n.data("label")) === name);
         if (hit.length === 1) return hit[0];

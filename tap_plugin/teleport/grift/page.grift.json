@@ -8,12 +8,12 @@
       "batch_entity": {
         "entity_id": "01a0cfa6-7437-737a-9ef4-69d77639be71",
         "entity_type": "batch",
-        "name": "teleport page v0.2.0",
+        "name": "teleport page v0.3.0",
         "dimensions": {}
       },
       "batch_node": {
         "source": "tap_plugin.teleport.grift.page",
-        "name": "teleport page v0.2.0",
+        "name": "teleport page v0.3.0",
         "description": "The /teleport operator page (req-teleport-page): the deployment graph panel with its projection, elevation, layout (teleport-deployment.js) and twelve scene searches — one per node set and one per edge type drawn — and seven teleport-board panels (posture, roles, identity, resources, requests, machines, trust). Reusable: nothing here names an instance; every search takes the cluster's name (?cluster=<cluster name>) and, absent, every cluster. References no entity outside this file."
       },
       "nodes": [
@@ -175,7 +175,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN c"
               ]
             },
@@ -183,9 +183,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -207,7 +210,7 @@
             "definition": {
               "query": [
                 "MATCH (n)-[:BELONGS_TO_CLUSTER__teleport]->(c:teleport__teleport_cluster)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "AND n.dimensions[\"teleport.plane\"] IN [\"deployment\", \"trust\", \"resource\"]",
                 "RETURN n, c"
               ]
@@ -216,9 +219,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -240,7 +246,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:RUNS_ON_COMPUTE__teleport]->(b)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -248,9 +254,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -272,7 +281,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:STORES_CLUSTER_STATE__teleport]->(b)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -280,9 +289,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -304,7 +316,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:WRITES_AUDIT_EVENTS__teleport]->(b)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -312,9 +324,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -336,7 +351,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:UPLOADS_SESSION_RECORDINGS__teleport]->(b)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -344,9 +359,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -362,13 +380,13 @@
           },
           "node": {
             "name": "teleport — calls-auth-api",
-            "description": "Both ends of every CALLS_AUTH_API__teleport edge — which auth servers each proxy calls — with the edge (a bare-variable RETURN carries it). Scoped to the cluster at BOTH ends (each endpoint's BELONGS_TO_CLUSTER edge), so a cross-cluster edge never pulls a foreign record onto this cluster's picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "description": "Both ends of every CALLS_AUTH_API__teleport edge — which auth servers each proxy calls — with the edge (a bare-variable RETURN carries it). Scoped to one cluster at BOTH ends (each endpoint's BELONGS_TO_CLUSTER edge reaches the same cluster variable), so a cross-cluster edge never pulls a foreign record onto this cluster's picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
             "search_type": "gryphon",
             "root": "node",
             "definition": {
               "query": [
-                "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:CALLS_AUTH_API__teleport]->(b:teleport__teleport_auth_server)-[:BELONGS_TO_CLUSTER__teleport]->(c2:teleport__teleport_cluster)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster) AND (c2.data.name = $cluster OR c2.entity_type = $cluster)",
+                "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:CALLS_AUTH_API__teleport]->(b:teleport__teleport_auth_server)-[:BELONGS_TO_CLUSTER__teleport]->(c)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -376,9 +394,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -394,13 +415,13 @@
           },
           "node": {
             "name": "teleport — dials-reverse-tunnel",
-            "description": "Both ends of every DIALS_REVERSE_TUNNEL__teleport edge — which proxies each agent tunnels to — with the edge (a bare-variable RETURN carries it). Scoped to the cluster at BOTH ends (each endpoint's BELONGS_TO_CLUSTER edge), so a cross-cluster edge never pulls a foreign record onto this cluster's picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "description": "Both ends of every DIALS_REVERSE_TUNNEL__teleport edge — which proxies each agent tunnels to — with the edge (a bare-variable RETURN carries it). Scoped to one cluster at BOTH ends (each endpoint's BELONGS_TO_CLUSTER edge reaches the same cluster variable), so a cross-cluster edge never pulls a foreign record onto this cluster's picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
             "search_type": "gryphon",
             "root": "node",
             "definition": {
               "query": [
-                "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:DIALS_REVERSE_TUNNEL__teleport]->(b:teleport__teleport_proxy_server)-[:BELONGS_TO_CLUSTER__teleport]->(c2:teleport__teleport_cluster)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster) AND (c2.data.name = $cluster OR c2.entity_type = $cluster)",
+                "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:DIALS_REVERSE_TUNNEL__teleport]->(b:teleport__teleport_proxy_server)-[:BELONGS_TO_CLUSTER__teleport]->(c)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -408,9 +429,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -432,7 +456,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:SIGNS_WITH_KEY__teleport]->(b)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -440,9 +464,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -458,13 +485,13 @@
           },
           "node": {
             "name": "teleport — serves-resource",
-            "description": "Both ends of every SERVES_RESOURCE__teleport edge — which resources each agent serves — with the edge (a bare-variable RETURN carries it). Scoped to the cluster at BOTH ends (each endpoint's BELONGS_TO_CLUSTER edge), so a cross-cluster edge never pulls a foreign record onto this cluster's picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
+            "description": "Both ends of every SERVES_RESOURCE__teleport edge — which resources each agent serves — with the edge (a bare-variable RETURN carries it). Scoped to one cluster at BOTH ends (each endpoint's BELONGS_TO_CLUSTER edge reaches the same cluster variable), so a cross-cluster edge never pulls a foreign record onto this cluster's picture. Scene rule: when the deployment picture gains a node or edge type, its search is added here — the graph draws only edges some search returns.",
             "search_type": "gryphon",
             "root": "node",
             "definition": {
               "query": [
-                "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:SERVES_RESOURCE__teleport]->(b)-[:BELONGS_TO_CLUSTER__teleport]->(c2:teleport__teleport_cluster)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster) AND (c2.data.name = $cluster OR c2.entity_type = $cluster)",
+                "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:SERVES_RESOURCE__teleport]->(b)-[:BELONGS_TO_CLUSTER__teleport]->(c)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -472,9 +499,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -496,7 +526,7 @@
             "definition": {
               "query": [
                 "MATCH (c:teleport__teleport_cluster)<-[:BELONGS_TO_CLUSTER__teleport]-(a)-[:FRONTS_TARGET__teleport]->(b)",
-                "WHERE (c.data.name = $cluster OR c.entity_type = $cluster)",
+                "WHERE ($cluster IS NULL OR c.data.name = $cluster)",
                 "RETURN a, b"
               ]
             },
@@ -504,9 +534,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false
@@ -528,7 +561,7 @@
             "definition": {
               "query": [
                 "MATCH (a:teleport__teleport_cluster)-[:TRUSTS_ROOT_CLUSTER__teleport]->(b:teleport__teleport_cluster)",
-                "WHERE (a.data.name = $cluster OR a.entity_type = $cluster) OR (b.data.name = $cluster OR b.entity_type = $cluster)",
+                "WHERE $cluster IS NULL OR a.data.name = $cluster OR b.data.name = $cluster",
                 "RETURN a, b"
               ]
             },
@@ -536,9 +569,12 @@
               "type": "object",
               "properties": {
                 "cluster": {
-                  "type": "string",
-                  "default": "teleport__teleport_cluster",
-                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, the default is the sentinel 'teleport__teleport_cluster' (the cluster type's own slug), which every cluster's entity_type equals, so every cluster matches: the one cluster on a single-cluster grid. The sentinel stands in for the optional filter Gryphon cannot yet say directly (tap#360); the cluster model refuses that name, so the sentinel is never a cluster's name."
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "description": "The Teleport cluster's name (teleport__teleport_cluster.name, its natural key), from ?cluster= on the page, matched exactly. Absent, it is null and every cluster matches ($cluster IS NULL): the one cluster on a single-cluster grid."
                 }
               },
               "additionalProperties": false

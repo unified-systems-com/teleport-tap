@@ -62,7 +62,6 @@ def test_board_panels_name_known_sections() -> None:
 
 
 READS_THROUGH_GRYPHON = pytest.mark.django_db(transaction=True, databases=["default", "search_readonly"])
-SENTINEL = "teleport__teleport_cluster"
 
 
 def _import_bundle() -> None:
@@ -92,12 +91,15 @@ def _touched(env: dict) -> set[str]:
 
 
 def test_every_search_takes_the_cluster_name_with_the_every_cluster_default() -> None:
-    """req-teleport-page-6: one input, `cluster`, defaulting to the type slug; every search filters on it."""
+    """req-teleport-page-6: one input, `cluster`, nullable and defaulting to null; every search filters on
+    it with `$cluster IS NULL OR …`, so absent means every cluster."""
     for s in _nodes(_doc(), "search"):
         schema = s["node"]["input_schema"]
         assert set(schema["properties"]) == {"cluster"}, s["entity"]["name"]
-        assert schema["properties"]["cluster"]["default"] == SENTINEL
-        assert "$cluster" in " ".join(s["node"]["definition"]["query"]), s["entity"]["name"]
+        cluster = schema["properties"]["cluster"]
+        assert cluster["type"] == ["string", "null"] and cluster["default"] is None, s["entity"]["name"]
+        query = " ".join(s["node"]["definition"]["query"])
+        assert "$cluster IS NULL OR" in query and "entity_type = $cluster" not in query, s["entity"]["name"]
 
 
 @READS_THROUGH_GRYPHON
@@ -146,7 +148,7 @@ def test_every_search_answers_for_one_cluster() -> None:
 
 @READS_THROUGH_GRYPHON
 def test_absent_cluster_means_every_cluster() -> None:
-    """req-teleport-page-6: ?cluster absent falls back to the schema default, which matches every cluster."""
+    """req-teleport-page-6: ?cluster absent falls back to the schema default, null, which matches every cluster."""
     from tap_plugin.teleport.tests import _design
 
     _import_bundle()
@@ -158,6 +160,25 @@ def test_absent_cluster_means_every_cluster() -> None:
     members = _run(specs["teleport — members"], {})
     assert {ids["auth-a"], ids["prod-auth"]} <= _touched(members)
     assert {n["name"] for n in _run(specs["teleport — clusters"], {"cluster": "prod"})["nodes"]} == {"prod"}
+
+
+@READS_THROUGH_GRYPHON
+def test_absent_cluster_still_keeps_both_ends_in_one_cluster() -> None:
+    """req-teleport-page-6: with ?cluster absent every cluster shows, but an edge search binds ONE cluster
+    variable at both ends, so an edge crossing from stg to prod is still never drawn."""
+    from tap_plugin.teleport.tests import _design
+
+    _import_bundle()
+    ids = _design.seed()
+    prod = set(_design.seed_second(ids).values())
+    specs = {s["entity"]["name"]: s for s in _nodes(_doc(), "search")}
+    for name in ("teleport — calls-auth-api", "teleport — dials-reverse-tunnel", "teleport — serves-resource"):
+        env = _run(specs[name], {})
+        drawn = [e.get("data") or e for e in env.get("edges", []) if (e.get("data") or e)["edge_type"] != "BELONGS_TO_CLUSTER__teleport"]
+        assert drawn, f"{name}: nothing drawn with ?cluster absent"
+        for ed in drawn:
+            ends = {str(ed["from_entity_id"]), str(ed["to_entity_id"])}
+            assert ends <= prod or not ends & prod, f"{name}: drew a cross-cluster edge with ?cluster absent"
 
 
 @READS_THROUGH_GRYPHON
