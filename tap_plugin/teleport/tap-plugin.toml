@@ -5,8 +5,14 @@ slug = "teleport"
 name = "TAP Teleport"
 description = "Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable /teleport operator page."
 
-# No depends_on: every edge that reaches another platform (compute, storage, keys, IdPs, fronted
-# targets, joining workloads) leaves that end open, so the vocabulary names no other plugin's type.
+# Every edge file that reaches another platform (compute, storage, keys, IdPs, fronted targets,
+# joining workloads) leaves that end open, so no edge file names another plugin's type. The one
+# dependency is a node declaration: teleport_user declares identity_core's HELD_BY_HUMAN to its
+# neutral human (req-teleport-person-link). Vocabulary only: no Python import; install + migrate order.
+depends_on = [
+    { slug = "identity_core", note = "Vocabulary dependency: teleport__teleport_user declares HELD_BY_HUMAN__identity_core to identity_core__human, the one person every system's account resolves to." },
+]
+
 # Pure Python, no crypto (spec-fips.md, req-tap-plugin-manifest-v0-fips).
 [fips]
 status = "compatible"
@@ -66,5 +72,5 @@ page = "grift/page.grift.json"
 # of the record; regenerate with scripts/boot-record-hash --refresh in a core checkout.
 [[boot.records]]
 name = "ci"
-description = "RESERVED NAME (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in — depends_on closure (empty) + self, offline, credential-free. The consumer flips self to editable."
-sha256 = "e493432c00eb3e2013995da21b8caec4ea82dbe2fed02bc8582b02075d4b09b2"
+description = "RESERVED NAME (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in — depends_on closure (identity_core, pinned at a git commit) + self; network only to install those pinned sources, credential-free. The consumer flips self to editable."
+sha256 = "d3bd7d083d0124809dd4fb33e7db6fa3230625b55b550963c82888f7c15539f8"

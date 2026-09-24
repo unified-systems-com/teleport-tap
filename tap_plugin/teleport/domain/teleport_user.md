@@ -12,6 +12,7 @@ Users are who holds roles. The local-vs-SSO split is itself a control: a local a
 
 - Count local vs SSO users.
 - Show which roles each user holds and how (`HOLDS_ROLE.granted_by`).
+- Resolve the account to the one person who holds it (`HELD_BY_HUMAN__identity_core`), so their Okta, Duo and GitLab accounts converge on the same node.
 
 ## Identity
 
@@ -20,12 +21,13 @@ Users are who holds roles. The local-vs-SSO split is itself a control: a local a
 ## Boundaries
 
 - No free-form `configuration` field: the resources Teleport keeps for this object can carry secret material or personal data (key material, a connector's client secret, a user's traits), so only promoted columns are stored.
-- Not the person in the IdP — the SSO connector's IdP owns that; a user reaches it through `LOGS_IN_VIA_CONNECTOR`.
+- Not the person. The person is `identity_core__human`, and the account points at it with `HELD_BY_HUMAN__identity_core` (declared in `OUTBOUND_EDGES`). The edge is drawn by whoever knows the match (an operator's seed, an HR feed, a collector matching an immutable id) and records how in `matched_on`; it is never inferred from the username or an email-shaped trait. A user with no such edge is unmatched, which an access review must see; a user with two is a shared account.
+- Not the IdP's record of the person: the SSO connector's IdP owns that, and a user reaches the connector through `LOGS_IN_VIA_CONNECTOR`.
 - Not bots (`teleport_bot`).
 
 ## Neutrality
 
-Vendor-specific record; a neutral principal substrate may later link to it the way `github_core__github_repository` links to `git_core__git_repository`.
+Vendor-specific record. The neutral half is `identity_core__human`, reached by `HELD_BY_HUMAN__identity_core`: identity_core owns the edge with a wildcard source, so it does not depend on teleport, and teleport depends on identity_core as vocabulary only.
 
 ## Observability
 

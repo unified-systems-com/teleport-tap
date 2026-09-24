@@ -37,6 +37,9 @@ class TeleportUser(BaseModel):
         {"nodes": [{"type": "teleport__teleport_access_request"}], "edges": [{"type": "RAISES_ACCESS_REQUEST__teleport"}]},
         {"nodes": [{"type": "teleport__teleport_access_request"}], "edges": [{"type": "REVIEWED_ACCESS_REQUEST__teleport"}]},
         {"nodes": [{"type": "teleport__teleport_trusted_device"}], "edges": [{"type": "ENROLLED_DEVICE__teleport"}]},
+        # The one foreign declaration (req-teleport-person-link): the account resolves to the person
+        # who holds it, identity_core's neutral human.
+        {"nodes": [{"type": "identity_core__human"}], "edges": [{"type": "HELD_BY_HUMAN__identity_core"}]},
     ]
     # No teleport edge ends here, so INBOUND_EDGES stays undeclared: an empty list would block
     # every inbound edge, foreign ones included.

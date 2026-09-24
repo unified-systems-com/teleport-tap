@@ -9,7 +9,7 @@
 | Slug | `teleport` |
 | Display name | TAP Teleport |
 | Description | Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable /teleport operator page. |
-| Kind | Leaf plugin: Teleport vocabulary plus its page. Consumes nothing (every edge that reaches another platform leaves that end open, so no `depends_on`); consumed by instance plugins that place a Teleport deployment in a design (highbar first). |
+| Kind | Leaf plugin: Teleport vocabulary plus its page. Every edge file that reaches another platform leaves that end open; the one `depends_on` is the neutral substrate `identity_core`, a vocabulary dependency from `teleport_user`'s declaration of `HELD_BY_HUMAN__identity_core` (`req-teleport-person-link`); consumed by instance plugins that place a Teleport deployment in a design (highbar first). |
 
 **Default dimensions**
 
@@ -48,7 +48,7 @@ A Teleport cluster is the front door to everything a FedRAMP operator administer
 | 2 | Answer The Assessor | The FedRAMP 20x questions about a Teleport cluster (FIPS, key custody, CA rotation, SSO-only sign-in, MFA, device trust, recording, grants, JIT requests, join paths, access reviews) each have a type or an edge to answer from. |
 | 3 | Grants As Paths | Who can reach what is traversable: IdP group → connector → role → resource, role → requestable role, token → joining workload. |
 | 4 | One Page Per Cluster | A reusable `/teleport` page draws any cluster's deployment and its operator front page, parameterized by the cluster, naming no instance. |
-| 5 | No Dependency Drag | The vocabulary names no other plugin's type, so it installs alone. |
+| 5 | No Dependency Drag | No edge file names another plugin's type; the only dependency is the neutral substrate `identity_core`, which owns the person every account resolves to. |
 
 ## Requirements
 
@@ -63,6 +63,7 @@ A Teleport cluster is the front door to everything a FedRAMP operator administer
 | req-teleport-identity | [Identity Models](#identity-models) | Implemented | Users, SSO connectors, bots, trusted devices |
 | req-teleport-resources | [Protected Resource Models](#protected-resource-models) | Implemented | SSH nodes, Kubernetes clusters, databases, applications, Windows desktops |
 | req-teleport-edges | [Edge Types](#edge-types-requirement) | Implemented | The twenty-six edge types |
+| req-teleport-person-link | [Person Link](#person-link) | Implemented | `teleport_user` declares `HELD_BY_HUMAN__identity_core` to `identity_core__human` |
 | req-teleport-page | [Teleport Page](#teleport-page) | Implemented | `/teleport`: the deployment graph and seven board sections |
 | req-teleport-layout-deployment | [Deployment Layout](#deployment-layout) | Implemented | The reusable layout module that draws one cluster |
 | req-teleport-panel-board | [Board Panel](#board-panel) | Implemented | The `teleport-board` panel type and its seven sections |
@@ -313,7 +314,7 @@ The twenty-six relationships in the tail catalog, each a `.edge.json` under `edg
 
 Every closed end names teleport types only. The eight edges that reach another platform — `RUNS_ON_COMPUTE`, `STORES_CLUSTER_STATE`, `WRITES_AUDIT_EVENTS`, `UPLOADS_SESSION_RECORDINGS`, `SIGNS_WITH_KEY`, `FRONTS_TARGET`, `ADMITS_IDENTITY`, `DELEGATES_LOGIN` — omit `targets`, and each description says what may appear there. Every `property_schema` is `additionalProperties: false`. Every edge stamps `teleport.plane`.
 
-Endpoint lists are **enforced**. The grid's permission union (`req-grid-edge-constraints-3`) lets an unconstrained node create any edge, so every teleport model declares `OUTBOUND_EDGES` — and `INBOUND_EDGES` where a teleport edge ends on it — derived from the edge files. A teleport edge from or to a type its definition does not name is refused (a role cannot "hold" a role; a forged grant path cannot be written). Foreign edge types stay permitted wherever their own endpoint lists are open or name the teleport type (e.g. compliance_core's `SCOPED_TO_COMPLIANCE_BOUNDARY`, whose sources are open). The three types no teleport edge ends on (agent, user, bot) leave `INBOUND_EDGES` undeclared, because an empty list would block every inbound edge, foreign ones included. A test asserts the declared constraints equal the edge files' endpoints, so they cannot drift.
+Endpoint lists are **enforced**. The grid's permission union (`req-grid-edge-constraints-3`) lets an unconstrained node create any edge, so every teleport model declares `OUTBOUND_EDGES` — and `INBOUND_EDGES` where a teleport edge ends on it — derived from the edge files. The one declaration that is not a teleport edge is `teleport_user`'s `HELD_BY_HUMAN__identity_core` (`req-teleport-person-link`). A teleport edge from or to a type its definition does not name is refused (a role cannot "hold" a role; a forged grant path cannot be written). Foreign edge types stay permitted wherever their own endpoint lists are open or name the teleport type (e.g. compliance_core's `SCOPED_TO_COMPLIANCE_BOUNDARY`, whose sources are open). The three types no teleport edge ends on (agent, user, bot) leave `INBOUND_EDGES` undeclared, because an empty list would block every inbound edge, foreign ones included. A test asserts the declared teleport-edge constraints equal the edge files' endpoints, and that the only foreign declaration is `HELD_BY_HUMAN__identity_core` on `teleport_user`, so neither can drift.
 
 No containment is declared: records do not retire with their cluster by cascade (a cluster rebuild re-observes them), so `CONTAINMENT_EDGES` is empty on every type.
 
@@ -325,7 +326,29 @@ No containment is declared: records do not retire with their cluster by cascade 
 | req-teleport-edges-2 | Open Only Across Platforms | Implemented | An end is open exactly for the eight cross-platform edges; every closed end names teleport types only. | same |
 | req-teleport-edges-3 | Closed Property Schemas | Implemented | Every property schema forbids extras and declares no `hotlink`; an unknown property or enum value is refused through the service layer. | same |
 | req-teleport-edges-4 | Plane Stamped | Implemented | Every edge carries its plane. | same |
-| req-teleport-edges-5 | Endpoints Enforced | Implemented | An edge from or to a type its definition does not name is refused through the service layer; declared node constraints equal the edge files' endpoints. | same |
+| req-teleport-edges-5 | Endpoints Enforced | Implemented | An edge from or to a type its definition does not name is refused through the service layer; declared teleport-edge node constraints equal the edge files' endpoints, and the only foreign declaration is `teleport_user`'s `HELD_BY_HUMAN__identity_core`. | same |
+
+---
+
+### Person Link
+----
+RID: `req-teleport-person-link`
+
+Status: `Implemented`
+
+A Teleport user is one system's account; the person behind it is `identity_core__human`, a neutral substrate type keyed on an operator-assigned handle. The link is identity_core's `HELD_BY_HUMAN__identity_core`, whose source is wildcard so the substrate never depends upward on teleport.
+
+#### Implementation
+
+`TeleportUser.OUTBOUND_EDGES` carries `{"nodes": [{"type": "identity_core__human"}], "edges": [{"type": "HELD_BY_HUMAN__identity_core"}]}`, which makes `identity_core` a declared vocabulary dependency (`depends_on`; the `ci` record installs it at a pinned commit). No edge file changes: the teleport edges still name teleport types only. Bots are machine identities and declare no person link. The edge is drawn by whoever knows the match (an operator's seed, an HR feed, a collector matching an immutable id) and records how in `matched_on`; nothing joins on the username or a trait. A user with no such edge is unmatched, and one with two is a shared account; both are access-review findings the graph shows rather than refuses.
+
+#### Acceptance Criteria
+
+| ACID | Title | Status | Description | Notes |
+| --- | --- | :---: | --- | --- |
+| req-teleport-person-link-1 | Declared | Implemented | `TeleportUser` declares `HELD_BY_HUMAN__identity_core` to `identity_core__human`, `TeleportBot` does not, and `identity_core` is in `depends_on`. | `tests/test_teleport_person.py` |
+| req-teleport-person-link-2 | Written Through The Service Layer | Implemented | A Teleport user writes `HELD_BY_HUMAN__identity_core` to a human with `matched_on`; an unknown property is refused. | same |
+| req-teleport-person-link-3 | Shared Account Recorded | Implemented | One Teleport user may be held by two humans; both edges stand. | same |
 
 ---
 
@@ -437,7 +460,7 @@ Status: `Implemented`
 
 #### Implementation
 
-`boot/ci.boot.json` installs teleport alone (no dependencies), offline and credential-free, and seeds teleport's own bundle; the consumer flips self to editable. Tests: `test_teleport_manifest.py` (validate_plugin structure + strict), `test_teleport_cluster.py`, `test_teleport_models.py`, `test_teleport_edges.py`, `test_teleport_board.py`, `test_teleport_page.py`; `tests/_design.py` is the shared HA design fixture.
+`boot/ci.boot.json` installs its `depends_on` closure (`identity_core`, pinned at a git commit) and teleport, credential-free and offline after installation, and seeds teleport's own bundle; the consumer flips self to editable. Tests: `test_teleport_manifest.py` (validate_plugin structure + strict), `test_teleport_cluster.py`, `test_teleport_models.py`, `test_teleport_edges.py`, `test_teleport_person.py`, `test_teleport_board.py`, `test_teleport_page.py`; `tests/_design.py` is the shared HA design fixture.
 
 #### Acceptance Criteria
 
