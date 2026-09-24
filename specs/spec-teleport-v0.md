@@ -9,7 +9,7 @@
 | Slug | `teleport` |
 | Display name | TAP Teleport |
 | Description | Teleport infrastructure access as grid vocabulary: a cluster's HA deployment, certificate authorities, roles, identities, join paths, access governance and protected resources, with a reusable /teleport operator page. |
-| Kind | Leaf plugin: Teleport vocabulary plus its page. Every edge file that reaches another platform leaves that end open; the one `depends_on` is the neutral substrate `identity_core`, a vocabulary dependency from `teleport_user`'s declaration of `HELD_BY_HUMAN__identity_core` (`req-teleport-person-link`); consumed by instance plugins that place a Teleport deployment in a design (highbar first). |
+| Kind | Leaf plugin: Teleport vocabulary plus its page. Every edge file that reaches another platform leaves that end open; the two `depends_on` are neutral substrates, both vocabulary dependencies from node declarations: `identity_core`, from `teleport_user`'s `HELD_BY_HUMAN__identity_core` (`req-teleport-person-link`), and `computing_core`, from `teleport_trusted_device`'s `REPRESENTS_HOST__computing_core` (`req-teleport-host-link`); consumed by instance plugins that place a Teleport deployment in a design (highbar first). |
 
 **Default dimensions**
 
@@ -48,7 +48,7 @@ A Teleport cluster is the front door to everything a FedRAMP operator administer
 | 2 | Answer The Assessor | The FedRAMP 20x questions about a Teleport cluster (FIPS, key custody, CA rotation, SSO-only sign-in, MFA, device trust, recording, grants, JIT requests, join paths, access reviews) each have a type or an edge to answer from. |
 | 3 | Grants As Paths | Who can reach what is traversable: IdP group → connector → role → resource, role → requestable role, token → joining workload. |
 | 4 | One Page Per Cluster | A reusable `/teleport` page draws any cluster's deployment and its operator front page, parameterized by the cluster, naming no instance. |
-| 5 | No Dependency Drag | No edge file names another plugin's type; the only dependency is the neutral substrate `identity_core`, which owns the person every account resolves to. |
+| 5 | No Dependency Drag | No edge file names another plugin's type; the only dependencies are the neutral substrates `identity_core`, which owns the person every account resolves to, and `computing_core`, which owns the machine every device record resolves to. |
 
 ## Requirements
 
@@ -64,6 +64,7 @@ A Teleport cluster is the front door to everything a FedRAMP operator administer
 | req-teleport-resources | [Protected Resource Models](#protected-resource-models) | Implemented | SSH nodes, Kubernetes clusters, databases, applications, Windows desktops |
 | req-teleport-edges | [Edge Types](#edge-types-requirement) | Implemented | The twenty-six edge types |
 | req-teleport-person-link | [Person Link](#person-link) | Implemented | `teleport_user` declares `HELD_BY_HUMAN__identity_core` to `identity_core__human` |
+| req-teleport-host-link | [Host Link](#host-link) | Implemented | `teleport__teleport_trusted_device` declares `REPRESENTS_HOST__computing_core` to `computing_core__host` |
 | req-teleport-page | [Teleport Page](#teleport-page) | Implemented | `/teleport`: the deployment graph and seven board sections |
 | req-teleport-layout-deployment | [Deployment Layout](#deployment-layout) | Implemented | The reusable layout module that draws one cluster |
 | req-teleport-panel-board | [Board Panel](#board-panel) | Implemented | The `teleport-board` panel type and its seven sections |
@@ -349,6 +350,37 @@ A Teleport user is one system's account; the person behind it is `identity_core_
 | req-teleport-person-link-1 | Declared | Implemented | `TeleportUser` declares `HELD_BY_HUMAN__identity_core` to `identity_core__human`, `TeleportBot` does not, and `identity_core` is in `depends_on` with `min_version = "0.1.3"`. | `tests/test_teleport_person.py` |
 | req-teleport-person-link-2 | Written Through The Service Layer | Implemented | A Teleport user writes `HELD_BY_HUMAN__identity_core` to a human with `matched_on`; an unknown property is refused. | same |
 | req-teleport-person-link-3 | Shared Account Recorded | Implemented | One Teleport user may be held by two humans; both edges stand. | same |
+
+---
+
+### Host Link
+----
+RID: `req-teleport-host-link`
+
+Status: `Implemented`
+
+A Teleport trusted device is Teleport's inventory record of a device, not the machine itself. The machine is `computing_core__host`, a neutral substrate node
+keyed on an operator-assigned asset tag, so the same laptop's Okta, Duo, Teleport, MDM and EDR records
+converge on one node, and that host reaches the person it is issued to with computing_core's
+`ASSIGNED_TO_HUMAN`. The link is computing_core's `REPRESENTS_HOST__computing_core`, whose source is
+wildcard so the substrate never depends on this plugin (the pattern of `HELD_BY_HUMAN__identity_core`).
+
+#### Implementation
+
+`TeleportTrustedDevice.OUTBOUND_EDGES` declares `{"nodes": [{"type": "computing_core__host"}], "edges": [{"type":
+"REPRESENTS_HOST__computing_core"}]}`. Under the permission union (`req-grid-edge-constraints-3`) this adds a
+permission and constrains nothing else. `computing_core` joins `depends_on` as a vocabulary dependency (no
+Python import); the `ci` record pins it at `daa040dbfbe11a390c02d22c7e4947b39face4b7`, the tap-plugin-computing-core commit that adds
+`host` and the edge. No tagged release carries them yet, so no `min_version` floor is declared; the floor
+lands when computing_core is released. The edge is drawn by whoever knows the match and records how in
+`matched_on` (a serial number, an asset tag, an operator seed); nothing joins on a hostname.
+
+#### Acceptance Criteria
+
+| ACID | Title | Status | Description | Notes |
+| --- | --- | :---: | --- | --- |
+| req-teleport-host-link-1 | Declared On The Device Record | Implemented | `TeleportTrustedDevice` declares `REPRESENTS_HOST__computing_core` to `computing_core__host`; `computing_core` is in `depends_on`; the record's own edges are still accepted. | `tests/test_teleport_host.py::test_host_link_is_declared`, `::test_record_keeps_its_own_edges` |
+| req-teleport-host-link-2 | Written Through The Service Layer | Implemented | The record writes the edge to a host with `matched_on`; an unknown property is refused (on a fresh pair). | `tests/test_teleport_host.py::test_record_represents_a_host`, `::test_unknown_property_is_refused` |
 
 ---
 

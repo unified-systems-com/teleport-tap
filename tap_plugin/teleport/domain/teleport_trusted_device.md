@@ -24,7 +24,7 @@ With device trust `required`, access depends on the device as well as the user â
 
 ## Neutrality
 
-Vendor-specific record; a neutral device substrate (computing_core) may later link to it.
+Vendor-specific record of a neutral machine: it points at `computing_core__host` with `REPRESENTS_HOST__computing_core` (declared in `OUTBOUND_EDGES`, `req-teleport-host-link`), drawn by whoever knows the match. Teleport's asset tag is the device serial number on macOS, Windows and Linux (see Identity), so a match made on it records `matched_on: serial number`.
 
 ## Observability
 

@@ -31,6 +31,9 @@ class TeleportTrustedDevice(BaseModel):
     # (or name this type) stay permitted by the grid's permission union.
     OUTBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
         {"nodes": [{"type": "teleport__teleport_cluster"}], "edges": [{"type": "BELONGS_TO_CLUSTER__teleport"}]},
+        # The neutral machine behind the record (req-teleport-host-link): computing_core's edge,
+        # whose source is open.
+        {"nodes": [{"type": "computing_core__host"}], "edges": [{"type": "REPRESENTS_HOST__computing_core"}]},
     ]
     INBOUND_EDGES: ClassVar[list[dict[str, Any]]] = [
         {"nodes": [{"type": "teleport__teleport_user"}], "edges": [{"type": "ENROLLED_DEVICE__teleport"}]},
