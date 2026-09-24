@@ -10,7 +10,7 @@ description = "Teleport infrastructure access as grid vocabulary: a cluster's HA
 # dependency is a node declaration: teleport_user declares identity_core's HELD_BY_HUMAN to its
 # neutral human (req-teleport-person-link). Vocabulary only: no Python import; install + migrate order.
 depends_on = [
-    { slug = "identity_core", note = "Vocabulary dependency: teleport__teleport_user declares HELD_BY_HUMAN__identity_core to identity_core__human, the one person every system's account resolves to." },
+    { slug = "identity_core", min_version = "0.1.3", note = "Vocabulary dependency: teleport__teleport_user declares HELD_BY_HUMAN__identity_core to identity_core__human, the one person every system's account resolves to." },
 ]
 
 # Pure Python, no crypto (spec-fips.md, req-tap-plugin-manifest-v0-fips).
@@ -73,4 +73,4 @@ page = "grift/page.grift.json"
 [[boot.records]]
 name = "ci"
 description = "RESERVED NAME (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in — depends_on closure (identity_core, pinned at a git commit) + self; network only to install those pinned sources, credential-free. The consumer flips self to editable."
-sha256 = "d3bd7d083d0124809dd4fb33e7db6fa3230625b55b550963c82888f7c15539f8"
+sha256 = "9df922d0560c98bb792641b6e627c48851c9ace7dc802ef95347f5b600a46861"

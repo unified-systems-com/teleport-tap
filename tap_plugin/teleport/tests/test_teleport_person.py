@@ -42,11 +42,13 @@ def _held(src: str, dst: str, properties: dict | None = None):
 
 def test_person_link_is_declared() -> None:
     """req-teleport-person-link-1: the user names the edge and the human, a bot does not, and the edge's
-    owner is a declared dependency."""
+    owner is a declared dependency, floored at the release that ships the human."""
     assert (HELD, HUMAN) in _declared(TeleportUser)
     assert not any(edge == HELD for edge, _ in _declared(TeleportBot))
     manifest = tomllib.loads((PKG / "tap-plugin.toml").read_text())
-    assert "identity_core" in {d["slug"] for d in manifest.get("depends_on", [])}
+    deps = {d["slug"]: d for d in manifest.get("depends_on", [])}
+    # The floor is the first identity_core release that ships identity_core__human.
+    assert deps["identity_core"].get("min_version") == "0.1.3"
 
 
 @pytest.mark.django_db
