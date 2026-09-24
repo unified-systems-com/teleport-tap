@@ -340,13 +340,13 @@ A Teleport user is one system's account; the person behind it is `identity_core_
 
 #### Implementation
 
-`TeleportUser.OUTBOUND_EDGES` carries `{"nodes": [{"type": "identity_core__human"}], "edges": [{"type": "HELD_BY_HUMAN__identity_core"}]}`, which makes `identity_core` a declared vocabulary dependency (`depends_on`; the `ci` record installs it at a pinned commit). No edge file changes: the teleport edges still name teleport types only. Bots are machine identities and declare no person link. The edge is drawn by whoever knows the match (an operator's seed, an HR feed, a collector matching an immutable id) and records how in `matched_on`; nothing joins on the username or a trait. A user with no such edge is unmatched, and one with two is a shared account; both are access-review findings the graph shows rather than refuses.
+`TeleportUser.OUTBOUND_EDGES` carries `{"nodes": [{"type": "identity_core__human"}], "edges": [{"type": "HELD_BY_HUMAN__identity_core"}]}`, which makes `identity_core` a declared vocabulary dependency (`depends_on`, floor `min_version = "0.1.3"`, the first identity_core release carrying the human; the `ci` record installs it at that tag's full commit). No edge file changes: the teleport edges still name teleport types only. Bots are machine identities and declare no person link. The edge is drawn by whoever knows the match (an operator's seed, an HR feed, a collector matching an immutable id) and records how in `matched_on`; nothing joins on the username or a trait. A user with no such edge is unmatched, and one with two is a shared account; both are access-review findings the graph shows rather than refuses.
 
 #### Acceptance Criteria
 
 | ACID | Title | Status | Description | Notes |
 | --- | --- | :---: | --- | --- |
-| req-teleport-person-link-1 | Declared | Implemented | `TeleportUser` declares `HELD_BY_HUMAN__identity_core` to `identity_core__human`, `TeleportBot` does not, and `identity_core` is in `depends_on`. | `tests/test_teleport_person.py` |
+| req-teleport-person-link-1 | Declared | Implemented | `TeleportUser` declares `HELD_BY_HUMAN__identity_core` to `identity_core__human`, `TeleportBot` does not, and `identity_core` is in `depends_on` with `min_version = "0.1.3"`. | `tests/test_teleport_person.py` |
 | req-teleport-person-link-2 | Written Through The Service Layer | Implemented | A Teleport user writes `HELD_BY_HUMAN__identity_core` to a human with `matched_on`; an unknown property is refused. | same |
 | req-teleport-person-link-3 | Shared Account Recorded | Implemented | One Teleport user may be held by two humans; both edges stand. | same |
 
@@ -460,7 +460,7 @@ Status: `Implemented`
 
 #### Implementation
 
-`boot/ci.boot.json` installs its `depends_on` closure (`identity_core`, pinned at a git commit) and teleport, credential-free and offline after installation, and seeds teleport's own bundle; the consumer flips self to editable. Tests: `test_teleport_manifest.py` (validate_plugin structure + strict), `test_teleport_cluster.py`, `test_teleport_models.py`, `test_teleport_edges.py`, `test_teleport_person.py`, `test_teleport_board.py`, `test_teleport_page.py`; `tests/_design.py` is the shared HA design fixture.
+`boot/ci.boot.json` installs its `depends_on` closure (`identity_core`, pinned at the full commit of its `v0.1.3` tag, the `depends_on` floor) and teleport, credential-free and offline after installation, and seeds teleport's own bundle; the consumer flips self to editable. Tests: `test_teleport_manifest.py` (validate_plugin structure + strict), `test_teleport_cluster.py`, `test_teleport_models.py`, `test_teleport_edges.py`, `test_teleport_person.py`, `test_teleport_board.py`, `test_teleport_page.py`; `tests/_design.py` is the shared HA design fixture.
 
 #### Acceptance Criteria
 
