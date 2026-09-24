@@ -118,13 +118,19 @@ def test_node_constraints_match_the_edge_files() -> None:
     from tap_grid.registry import get_model_class
 
     defs = _defs()
+    manifest = (PKG / "tap-plugin.toml").read_text()
+    # Every model the manifest registers, not only edge-file sources, so a foreign permission on a type
+    # that starts no teleport edge is still caught.
+    all_types = set(re.findall(r'^(teleport__[a-z_]+) = "', manifest, re.M))
+    sources = {t for d in defs.values() for t in d["sources"]}
+    assert sources <= all_types
     foreign: set[tuple[str, str, tuple[str, ...]]] = set()
-    for type_slug in {t for d in defs.values() for t in d["sources"]}:
+    for type_slug in sorted(all_types):
         model = get_model_class(type_slug)
-        declared = {e["type"] for entry in model.OUTBOUND_EDGES for e in entry["edges"]}
+        declared = {e["type"] for entry in (getattr(model, "OUTBOUND_EDGES", None) or []) for e in entry["edges"]}
         own = {slug for slug in declared if slug.endswith("__teleport")}
         assert own == {slug for slug, d in defs.items() if type_slug in d["sources"]}, type_slug
-        for entry in model.OUTBOUND_EDGES:
+        for entry in getattr(model, "OUTBOUND_EDGES", None) or []:
             for e in entry["edges"]:
                 if not e["type"].endswith("__teleport"):
                     targets = tuple(sorted(n["type"] for n in entry.get("nodes", [])))
