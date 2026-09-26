@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "teleport CI record (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in. Installs the depends_on closure (identity_core, the vocabulary dependency behind teleport_user's HELD_BY_HUMAN__identity_core declaration, from git at a pinned commit) and teleport; the consumer flips self to editable so the checkout under test runs, not the pinned revision. Population seeds teleport's own bundle (the /teleport page). Installation fetches the two pinned git sources; nothing after installation reaches the network, and no credential is used. Deliberately excluded: every plugin outside the depends_on closure.",
+  "description": "teleport CI record (req-boot-bootstrap-ci-record): the stack this plugin's own tests run in. Installs the depends_on closure (identity_core and computing_core, the vocabulary dependencies behind REPRESENTS_HOST__computing_core and teleport_user's HELD_BY_HUMAN__identity_core declaration, from git at a pinned commit) and teleport; the consumer flips self to editable so the checkout under test runs, not the pinned revision. Population seeds teleport's own bundle (the /teleport page). Installation fetches the three pinned git sources; nothing after installation reaches the network, and no credential is used. Deliberately excluded: every plugin outside the depends_on closure.",
   "install": {
     "plugins": [
       {
@@ -12,6 +12,16 @@
           "rev": "53da388b6f47590090ef3bdc8d98731acff4c8e2"
         },
         "note": "Vocabulary dependency, pinned at the full commit of the v0.1.3 tag (this plugin's depends_on floor), the first release carrying identity_core__human and HELD_BY_HUMAN__identity_core. Offline and credential-free."
+      },
+      {
+        "slug": "computing_core",
+        "enabled": true,
+        "source": {
+          "type": "git",
+          "url": "https://github.com/unified-systems-com/tap-plugin-computing-core",
+          "rev": "daa040dbfbe11a390c02d22c7e4947b39face4b7"
+        },
+        "note": "Vocabulary dependency behind REPRESENTS_HOST__computing_core, pinned at the commit that adds computing_core__host (tap-plugin-computing-core#10); no tagged release carries it yet. It brings identity_core, already installed above. Credential-free."
       },
       {
         "slug": "teleport",

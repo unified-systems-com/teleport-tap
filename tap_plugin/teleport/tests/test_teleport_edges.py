@@ -109,12 +109,14 @@ def test_off_vocabulary_endpoints_are_refused() -> None:
 #: The only declared edges that are not this plugin's: (source type, edge type, target types).
 FOREIGN_DECLARATIONS = {
     ("teleport__teleport_user", "HELD_BY_HUMAN__identity_core", ("identity_core__human",)),
+    ("teleport__teleport_trusted_device", "REPRESENTS_HOST__computing_core", ("computing_core__host",)),
 }
 
 
 def test_node_constraints_match_the_edge_files() -> None:
     """The declared teleport-edge node constraints are exactly the edge files' endpoints, and the only
-    foreign declaration is teleport_user's HELD_BY_HUMAN to identity_core's human, so neither can drift."""
+    foreign declarations are teleport_user's HELD_BY_HUMAN to identity_core's human and
+    teleport_trusted_device's REPRESENTS_HOST to computing_core's host, so neither can drift."""
     from tap_grid.registry import get_model_class
 
     defs = _defs()
