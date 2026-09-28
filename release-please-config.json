@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "python",
+  "include-component-in-tag": false,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    ".": {
+      "package-name": "teleport-tap",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "tap_plugin/teleport/tap-plugin.toml"
+        },
+        {
+          "type": "json",
+          "path": "tap_plugin/teleport/boot/ci.boot.json",
+          "jsonpath": "$.install.plugins[?(@.slug=='teleport')].source.rev"
+        }
+      ],
+      "initial-version": "0.1.0"
+    }
+  }
+}
