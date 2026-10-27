@@ -40,6 +40,6 @@ jobs:
       contents: read
       id-token: write
       attestations: write
-    uses: unified-systems-com/tap/.github/workflows/plugin-release-sbom.yml@da212f5c0cf73d50d644f1c608e14b47515ccee8
+    uses: unified-systems-com/tap/.github/workflows/plugin-release-sbom.yml@1cc2e03e99d789ec337e98b20deb225228777a2b
     with:
       plugin_slug: teleport
