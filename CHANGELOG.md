@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.1...v0.1.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **ci-record:** pin identity-core-tap to release tags, not commit SHAs ([#30](https://github.com/unified-systems-com/teleport-tap/issues/30)) ([ee6502a](https://github.com/unified-systems-com/teleport-tap/commit/ee6502acf0e6c033716442c2ea433bff34e29356))
+
 ## [0.1.1](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.0...v0.1.1) (2026-10-20)
 
 
