@@ -66,6 +66,7 @@ REVIEWED_ACCESS_REQUEST__teleport = "edges/REVIEWED_ACCESS_REQUEST.edge.json"
 ENROLLED_DEVICE__teleport = "edges/ENROLLED_DEVICE.edge.json"
 
 [grift]
+dimension = "grift/dimension.grift.json"
 page = "grift/page.grift.json"
 
 # In-package boot record (req-boot-bootstrap-records-in-package). Digest is the canonical sha256
