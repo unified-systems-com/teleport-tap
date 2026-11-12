@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "grift_version": "0"
+  },
+  "_reserved": {},
+  "batches": [
+    {
+      "batch_entity": {
+        "entity_id": "01a1d10a-f210-713f-a940-4c383543666a",
+        "entity_type": "batch",
+        "name": "Teleport dimensions v0.1.0",
+        "dimensions": {}
+      },
+      "batch_node": {
+        "source": "plugins.teleport",
+        "name": "Teleport dimensions v0.1.0",
+        "description": "Dimension nodes for every dimension key the teleport plugin declares, so each key has a declared node before the dimension map moves to keying by node id (tap#708, tap#711)."
+      },
+      "nodes": [
+        {
+          "entity": {
+            "entity_id": "01a1d10a-f210-713f-a940-4c37b7d0b023",
+            "entity_type": "dimension",
+            "name": "teleport.plane",
+            "dimensions": {
+              "tap.meta": "dimension"
+            }
+          },
+          "node": {
+            "name": "teleport.plane",
+            "description": "Which part of a Teleport cluster a node or edge belongs to: deployment, trust, identity, policy or resource. Defined in domain/dimensions/teleport.plane.md."
+          }
+        }
+      ],
+      "edges": []
+    }
+  ]
+}
