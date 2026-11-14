@@ -11,6 +11,7 @@ import pytest
 
 from tap_grid.caller_context import CallerContext
 from tap_grid.services import WriteOperation, write_batch
+from tap_plugin.teleport.tests.conftest import dimension_view
 
 PKG = Path(__file__).resolve().parents[1]
 EDGE_FILES = sorted((PKG / "edges").glob("*.edge.json"))
@@ -82,7 +83,7 @@ def test_endpoints_and_properties_are_enforced() -> None:
     user = _node("teleport__teleport_user", {"name": "alice", "cluster_name": "stg"})
     ok = _edge(user, cluster, "BELONGS_TO_CLUSTER__teleport")
     assert ok.success, ok
-    assert Entity.objects.get(id=ok.entity_id).dimensions.get("teleport.plane") == "deployment"
+    assert dimension_view(Entity.objects.get(id=ok.entity_id)).get("teleport.plane") == "deployment"
     assert _edge(user, role, "HOLDS_ROLE__teleport", {"granted_by": "static"}).success
     assert not _edge(user, role, "HOLDS_ROLE__teleport", {"granted_by": "magic"}).success
     assert not _edge(user, role, "HOLDS_ROLE__teleport", {"why": "x"}).success
