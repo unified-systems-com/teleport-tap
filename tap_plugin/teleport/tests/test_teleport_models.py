@@ -14,6 +14,7 @@ from django.apps import apps
 
 from tap_grid.caller_context import CallerContext
 from tap_grid.services import WriteOperation, write_batch
+from tap_plugin.teleport.tests.conftest import dimension_view
 
 #: type slug -> the minimal design payload (exactly CREATE_REQUIRED) and the expected plane.
 MINIMAL: dict[str, tuple[dict[str, Any], str]] = {
@@ -82,7 +83,7 @@ def test_created_from_design_payload(type_slug: str) -> None:
     result = _create(type_slug, payload)
     assert result.success, result
     row = _model(type_slug).all_objects.get(entity_id=result.entity_id)
-    assert row.entity.dimensions.get("teleport.plane") == plane
+    assert dimension_view(row.entity).get("teleport.plane") == plane
     assert row.entity.name == row.get_name() != ""
 
 
