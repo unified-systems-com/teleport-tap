@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.2...v0.1.3) (2026-11-17)
+
+
+### Features
+
+* declare Dimension nodes for this plugin's dimension keys ([#36](https://github.com/unified-systems-com/teleport-tap/issues/36)) ([2969e1f](https://github.com/unified-systems-com/teleport-tap/commit/2969e1fa5d849d81676fac13d1b4478e70b89b46))
+
 ## [0.1.2](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.1...v0.1.2) (2026-11-05)
 
 
