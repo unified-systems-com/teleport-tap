@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -26,6 +27,8 @@ class TeleportSshNode(BaseModel):
     # A design knows a host by its hostname; Teleport's node resource is named by host UUID, which
     # exists only after the host joins. Revisit to `(cluster_name, host_id)` when observed.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'hostname')
+    # No event time: no creation time in the model; labels are operator-defined strings.
+    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

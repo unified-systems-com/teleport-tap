@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import Interval
 from tap_grid.models import BaseModel
 
 
@@ -26,6 +27,9 @@ class TeleportAccessRequest(BaseModel):
     # Teleport assigns each request a UUID (`metadata.name`); unique within the cluster. A request
     # is observed, not designed.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # spec.created: when the auth server registered the request; spec.expires: the source-stated end of
+    # the request (pending) or of the access it grants (approved). Both RFC 3339, zoned.
+    EVENT_TIME = Interval("created_at", "created", end="expires_at")
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

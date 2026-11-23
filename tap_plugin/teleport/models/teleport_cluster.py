@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -27,6 +28,8 @@ class TeleportCluster(BaseModel):
     # (`cluster_name`), baked into every certificate the cluster issues, and cannot be changed
     # without rebuilding the cluster. A design knows it before anything is built.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('name',)
+    # No event time: the cluster's settings carry no creation time; tags hold no time.
+    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

@@ -26,6 +26,11 @@
       }
     }
   },
+  "event_time": {
+    "shape": "moment",
+    "field": "reviewed_at",
+    "kind": "occurred"
+  },
   "default_dimensions": {
     "teleport.plane": "policy"
   }

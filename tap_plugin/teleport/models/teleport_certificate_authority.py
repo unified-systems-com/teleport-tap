@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -26,6 +27,8 @@ class TeleportCertificateAuthority(BaseModel):
     # A cluster has exactly one CA of each type, and Teleport names the CA resource after the
     # cluster, so `(cluster_name, ca_type)` is Teleport's own identity and a design can know it.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'ca_type')
+    # last_rotated_at is when the keys last changed, not when the CA came to exist; it stays a typed field.
+    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

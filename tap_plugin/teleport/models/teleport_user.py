@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import Interval
 from tap_grid.models import BaseModel
 
 
@@ -26,6 +27,8 @@ class TeleportUser(BaseModel):
     # Teleport user names are unique within a cluster and are the identity stamped into the user
     # certificate.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # spec.created_by.time: when Teleport created the user (RFC 3339, zoned); no end is stored.
+    EVENT_TIME = Interval("created_at", "created")
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -26,6 +27,8 @@ class TeleportRole(BaseModel):
     # Role names are unique within a cluster and are what users, connectors and access lists
     # reference, so `(cluster_name, name)` is Teleport's own identity.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
+    # No event time: role resources carry no creation time; allow/deny/options hold rules and durations, not times.
+    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.
