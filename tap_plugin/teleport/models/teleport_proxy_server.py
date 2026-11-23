@@ -20,6 +20,8 @@ class TeleportProxyServer(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "One Teleport process running the Proxy Service: the stateless public front door (web UI, TLS routing, reverse tunnels) that users and agents dial, which calls the Auth Service for every decision."
     )
+    # No event time: a heartbeat record with no creation time in the model.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-proxy-server"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,8 +29,6 @@ class TeleportProxyServer(BaseModel):
     # As for the auth server: the design knows a name; Teleport's host UUID arrives on first start.
     # Revisit to `(cluster_name, host_id)` when observed.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # No event time: a heartbeat record with no creation time in the model.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

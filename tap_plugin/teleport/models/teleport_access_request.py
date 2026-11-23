@@ -20,6 +20,9 @@ class TeleportAccessRequest(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A just-in-time access request: a user asks for roles or specific resources for a bounded time, reviewers approve or deny it, and an approved request is assumed as elevated certificates."
     )
+    # spec.created: when the auth server registered the request; spec.expires: the source-stated end of
+    # the request (pending) or of the access it grants (approved). Both RFC 3339, zoned.
+    EVENT_TIME = Interval("created_at", "created", end="expires_at")
     ENTITY_ICON: ClassVar[str] = "teleport-access-request"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,9 +30,6 @@ class TeleportAccessRequest(BaseModel):
     # Teleport assigns each request a UUID (`metadata.name`); unique within the cluster. A request
     # is observed, not designed.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # spec.created: when the auth server registered the request; spec.expires: the source-stated end of
-    # the request (pending) or of the access it grants (approved). Both RFC 3339, zoned.
-    EVENT_TIME = Interval("created_at", "created", end="expires_at")
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

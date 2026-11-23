@@ -20,14 +20,14 @@ class TeleportBot(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Machine ID bot: a non-human identity whose `tbot` agent joins the cluster (by token or a delegated join method) and renews short-lived certificates for the roles it holds."
     )
+    # No event time: no creation time in the model; max_session_ttl is a duration and traits hold no time.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-bot"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
     DEFAULT_DIMENSIONS: ClassVar[dict[str, str]] = {"teleport.plane": "identity"}
     # Bot names are unique within a cluster (Teleport creates a `bot-<name>` user and role from it).
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # No event time: no creation time in the model; max_session_ttl is a duration and traits hold no time.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

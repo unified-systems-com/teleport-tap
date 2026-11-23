@@ -20,6 +20,8 @@ class TeleportUser(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Teleport user: a local account (password + MFA) or an SSO user Teleport creates at login from a connector, with the traits that fill role templates."
     )
+    # spec.created_by.time: when Teleport created the user (RFC 3339, zoned); no end is stored.
+    EVENT_TIME = Interval("created_at", "created")
     ENTITY_ICON: ClassVar[str] = "teleport-user"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,8 +29,6 @@ class TeleportUser(BaseModel):
     # Teleport user names are unique within a cluster and are the identity stamped into the user
     # certificate.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # spec.created_by.time: when Teleport created the user (RFC 3339, zoned); no end is stored.
-    EVENT_TIME = Interval("created_at", "created")
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

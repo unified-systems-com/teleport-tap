@@ -20,6 +20,8 @@ class TeleportCertificateAuthority(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "One of the cluster's certificate authorities (host, user, database, OpenSSH, JWT, SAML IdP, OIDC IdP, SPIFFE \u2026): the key pair that signs a class of short-lived certificates, with its rotation phase and where its private key is stored."
     )
+    # last_rotated_at is when the keys last changed, not when the CA came to exist; it stays a typed field.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-certificate-authority"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,8 +29,6 @@ class TeleportCertificateAuthority(BaseModel):
     # A cluster has exactly one CA of each type, and Teleport names the CA resource after the
     # cluster, so `(cluster_name, ca_type)` is Teleport's own identity and a design can know it.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'ca_type')
-    # last_rotated_at is when the keys last changed, not when the CA came to exist; it stays a typed field.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

@@ -20,6 +20,8 @@ class TeleportTrustedDevice(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A device registered in Teleport's device inventory (by serial / asset tag) and, once enrolled, holding a device credential that device-trust mode requires before access is granted."
     )
+    # No event time: no enrollment or creation time in the model.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-trusted-device"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,8 +29,6 @@ class TeleportTrustedDevice(BaseModel):
     # Teleport identifies a device by its asset tag (the serial number on macOS/Windows/Linux)
     # within the cluster's inventory; the internal UUID is assigned at registration.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'asset_tag')
-    # No event time: no enrollment or creation time in the model.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

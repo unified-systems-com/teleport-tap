@@ -20,6 +20,8 @@ class TeleportAccessList(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "An access list: a set of owners and members that grants roles and traits to its members, with a periodic access review (audit) that owners must complete."
     )
+    # next_audit_date is a future review due date, not when the list came to exist; no creation time is stored.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-access-list"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -28,8 +30,6 @@ class TeleportAccessList(BaseModel):
     # cluster. A design keys on the name it chooses; revisit if the collector must key on the
     # assigned UUID.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # next_audit_date is a future review due date, not when the list came to exist; no creation time is stored.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

@@ -20,6 +20,8 @@ class TeleportRole(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Teleport role: allow and deny rules (logins, resource label selectors, Kubernetes groups, database users, resource verbs, request and review permissions) plus session options such as MFA-per-session and maximum TTL."
     )
+    # No event time: role resources carry no creation time; allow/deny/options hold rules and durations, not times.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-role"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,8 +29,6 @@ class TeleportRole(BaseModel):
     # Role names are unique within a cluster and are what users, connectors and access lists
     # reference, so `(cluster_name, name)` is Teleport's own identity.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # No event time: role resources carry no creation time; allow/deny/options hold rules and durations, not times.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

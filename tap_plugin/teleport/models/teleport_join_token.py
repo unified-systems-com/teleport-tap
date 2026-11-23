@@ -27,6 +27,8 @@ class TeleportJoinToken(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A provision token: what a new agent, proxy or bot must present to join the cluster, with its join method (static secret, EC2/IAM, GitHub, GitLab, Kubernetes, TPM \u2026), the system roles it confers and the external identities it admits."
     )
+    # Only the token's expiry is stored: an end with no start states no event time.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-join-token"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -35,8 +37,6 @@ class TeleportJoinToken(BaseModel):
     # so for that method only its digest (`sha256:<64 hex>`) is accepted in `name` — the model
     # refuses anything else; delegated methods have non-secret names.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # Only the token's expiry is stored: an end with no start states no event time.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

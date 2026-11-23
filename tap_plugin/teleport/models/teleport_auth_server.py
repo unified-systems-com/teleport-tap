@@ -20,6 +20,8 @@ class TeleportAuthServer(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "One Teleport process running the Auth Service: the cluster's certificate authority and API, which issues certificates, evaluates roles, and reads and writes the backend, audit log and session-recording storage."
     )
+    # No event time: a heartbeat record with no creation time in the model.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-auth-server"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -28,8 +30,6 @@ class TeleportAuthServer(BaseModel):
     # host UUID (`host_id`), which exists only once the process first starts. Revisit to
     # `(cluster_name, host_id)` when the collector observes it.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'name')
-    # No event time: a heartbeat record with no creation time in the model.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

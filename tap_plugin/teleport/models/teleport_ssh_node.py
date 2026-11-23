@@ -20,6 +20,8 @@ class TeleportSshNode(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A server reachable over SSH through Teleport: a host running the Teleport SSH Service, or an agentless OpenSSH host registered with the cluster."
     )
+    # No event time: no creation time in the model; labels are operator-defined strings.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-ssh-node"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -27,8 +29,6 @@ class TeleportSshNode(BaseModel):
     # A design knows a host by its hostname; Teleport's node resource is named by host UUID, which
     # exists only after the host joins. Revisit to `(cluster_name, host_id)` when observed.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('cluster_name', 'hostname')
-    # No event time: no creation time in the model; labels are operator-defined strings.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.

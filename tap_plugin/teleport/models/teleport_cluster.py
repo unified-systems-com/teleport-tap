@@ -20,6 +20,8 @@ class TeleportCluster(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Teleport cluster: the access service (Auth Service + Proxy Service and the backend they share) that brokers SSH, Kubernetes, database, application and desktop access, and the cluster-wide settings that govern it."
     )
+    # No event time: the cluster's settings carry no creation time; tags hold no time.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-cluster"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
@@ -28,8 +30,6 @@ class TeleportCluster(BaseModel):
     # (`cluster_name`), baked into every certificate the cluster issues, and cannot be changed
     # without rebuilding the cluster. A design knows it before anything is built.
     NATURAL_KEY: ClassVar[tuple[str, ...]] = ('name',)
-    # No event time: the cluster's settings carry no creation time; tags hold no time.
-    EVENT_TIME = NO_EVENT_TIME
     # Node constraints derived from this plugin's edge files (req-teleport-edges-5): the teleport
     # edges this type may start / receive. Foreign edge types whose own endpoint lists are open
     # (or name this type) stay permitted by the grid's permission union.
