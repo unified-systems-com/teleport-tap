@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportWindowsDesktop(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Windows host reachable over Teleport's desktop access (RDP through the proxy with certificate-based smart-card login), registered statically or discovered from Active Directory."
     )
+    # No event time: no creation time in the model; labels are operator-defined strings.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-windows-desktop"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

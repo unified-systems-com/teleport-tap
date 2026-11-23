@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportCertificateAuthority(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "One of the cluster's certificate authorities (host, user, database, OpenSSH, JWT, SAML IdP, OIDC IdP, SPIFFE \u2026): the key pair that signs a class of short-lived certificates, with its rotation phase and where its private key is stored."
     )
+    # last_rotated_at is when the keys last changed, not when the CA came to exist; it stays a typed field.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-certificate-authority"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportAccessList(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "An access list: a set of owners and members that grants roles and traits to its members, with a periodic access review (audit) that owners must complete."
     )
+    # next_audit_date is a future review due date, not when the list came to exist; no creation time is stored.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-access-list"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportTrustedDevice(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A device registered in Teleport's device inventory (by serial / asset tag) and, once enrolled, holding a device credential that device-trust mode requires before access is granted."
     )
+    # No event time: no enrollment or creation time in the model.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-trusted-device"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

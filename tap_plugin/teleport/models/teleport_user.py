@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import Interval
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportUser(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Teleport user: a local account (password + MFA) or an SSO user Teleport creates at login from a connector, with the traits that fill role templates."
     )
+    # spec.created_by.time: when Teleport created the user (RFC 3339, zoned); no end is stored.
+    EVENT_TIME = Interval("created_at", "created")
     ENTITY_ICON: ClassVar[str] = "teleport-user"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

@@ -10,6 +10,7 @@ from typing import Any, ClassVar
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 #: Join methods whose token name is itself the shared secret.
@@ -26,6 +27,8 @@ class TeleportJoinToken(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A provision token: what a new agent, proxy or bot must present to join the cluster, with its join method (static secret, EC2/IAM, GitHub, GitLab, Kubernetes, TPM \u2026), the system roles it confers and the external identities it admits."
     )
+    # Only the token's expiry is stored: an end with no start states no event time.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-join-token"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

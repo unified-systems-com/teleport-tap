@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportApp(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "An application registered with Teleport \u2014 an internal web app, a TCP service, a cloud console (AWS/Azure/GCP) or an MCP server \u2014 served by an Application Service agent behind the proxy."
     )
+    # No event time: no creation time in the model; labels are operator-defined strings.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-app"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

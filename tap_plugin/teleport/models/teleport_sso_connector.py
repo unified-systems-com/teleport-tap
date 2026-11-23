@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportSsoConnector(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A SAML, OIDC or GitHub authentication connector: the trust Teleport places in an external identity provider, and the mappings from the IdP's attributes, claims or teams to Teleport roles."
     )
+    # No event time: connector resources carry no creation time.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-sso-connector"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

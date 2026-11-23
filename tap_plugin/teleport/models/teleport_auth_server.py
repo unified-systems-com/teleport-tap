@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportAuthServer(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "One Teleport process running the Auth Service: the cluster's certificate authority and API, which issues certificates, evaluates roles, and reads and writes the backend, audit log and session-recording storage."
     )
+    # No event time: a heartbeat record with no creation time in the model.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-auth-server"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

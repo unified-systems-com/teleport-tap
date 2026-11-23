@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import Interval
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,9 @@ class TeleportAccessRequest(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A just-in-time access request: a user asks for roles or specific resources for a bounded time, reviewers approve or deny it, and an approved request is assumed as elevated certificates."
     )
+    # spec.created: when the auth server registered the request; spec.expires: the source-stated end of
+    # the request (pending) or of the access it grants (approved). Both RFC 3339, zoned.
+    EVENT_TIME = Interval("created_at", "created", end="expires_at")
     ENTITY_ICON: ClassVar[str] = "teleport-access-request"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

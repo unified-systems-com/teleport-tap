@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportDatabase(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A database registered with Teleport (PostgreSQL, MySQL, MongoDB, Redis, DynamoDB \u2026) and served by a Database Service agent, reached with short-lived client certificates or IAM auth."
     )
+    # No event time: no creation time in the model; labels are operator-defined strings.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-database"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

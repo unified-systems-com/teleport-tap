@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportRole(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Teleport role: allow and deny rules (logins, resource label selectors, Kubernetes groups, database users, resource verbs, request and review permissions) plus session options such as MFA-per-session and maximum TTL."
     )
+    # No event time: role resources carry no creation time; allow/deny/options hold rules and durations, not times.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-role"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

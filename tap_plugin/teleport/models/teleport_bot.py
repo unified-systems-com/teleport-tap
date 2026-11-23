@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportBot(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A Machine ID bot: a non-human identity whose `tbot` agent joins the cluster (by token or a delegated join method) and renews short-lived certificates for the roles it holds."
     )
+    # No event time: no creation time in the model; max_session_ttl is a duration and traits hold no time.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-bot"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.

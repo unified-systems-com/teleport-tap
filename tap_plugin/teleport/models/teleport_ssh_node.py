@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 
 from django.db import models
 
+from tap_grid.event_time import NO_EVENT_TIME
 from tap_grid.models import BaseModel
 
 
@@ -19,6 +20,8 @@ class TeleportSshNode(BaseModel):
     ENTITY_DESCRIPTION: ClassVar[str] = (
         "A server reachable over SSH through Teleport: a host running the Teleport SSH Service, or an agentless OpenSSH host registered with the cluster."
     )
+    # No event time: no creation time in the model; labels are operator-defined strings.
+    EVENT_TIME = NO_EVENT_TIME
     ENTITY_ICON: ClassVar[str] = "teleport-ssh-node"
     # The Teleport plane this type belongs to (domain/dimensions/teleport.plane.md). No dcom or
     # environment default: those belong to the observation, stamped by whoever writes the node.
