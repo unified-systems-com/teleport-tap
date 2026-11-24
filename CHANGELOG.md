@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.4](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.3...v0.1.4) (2026-11-24)
+
+
+### Features
+
+* declare event time for every model (tap v0.4.7) ([da65a55](https://github.com/unified-systems-com/teleport-tap/commit/da65a55fc475f845c91b5a961f21978654c176fe))
+* declare event time for every model (tap v0.4.7) ([65642fe](https://github.com/unified-systems-com/teleport-tap/commit/65642fe6bf23751d9167dfda4d2651e7eb17efe9))
+* tap v0.4.9 — spine copies migration, format "1" documents ([39ab490](https://github.com/unified-systems-com/teleport-tap/commit/39ab49066d9bc85c632f5469e5278a34a41ff5ca))
+* tap v0.4.9 — spine copies migration, format "1" documents ([d7c8776](https://github.com/unified-systems-com/teleport-tap/commit/d7c87768321475373d2f84eec7b9ed056a6961b8))
+
 ## [0.1.3](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.2...v0.1.3) (2026-11-17)
 
 
