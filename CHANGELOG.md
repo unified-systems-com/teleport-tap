@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.5](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.4...v0.1.5) (2026-11-25)
+
+
+### Bug Fixes
+
+* ship the history event-time migration on the tap v0.5.0 floor ([2631cba](https://github.com/unified-systems-com/teleport-tap/commit/2631cba155d55d5383e3b8534703569a837393b4))
+* ship the history event-time migration on the tap v0.5.0 floor ([508b5d2](https://github.com/unified-systems-com/teleport-tap/commit/508b5d21e7cda91527e2122974ccb2a0b90b395e))
+
 ## [0.1.4](https://github.com/unified-systems-com/teleport-tap/compare/v0.1.3...v0.1.4) (2026-11-24)
 
 
